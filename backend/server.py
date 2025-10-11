@@ -30,12 +30,15 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # JWT Configuration
-SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'your-secret-key-change-this')
+SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'asistente-definitivo-secret-key-2024')
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 720
+
+# Account limits
+MAX_ACCOUNTS_PER_USER = 4
 
 # FastAPI app
-app = FastAPI(title="Personal Assistant API", version="1.0.0")
+app = FastAPI(title="Asistente-Definitivo API", version="2.0.0")
 api_router = APIRouter(prefix="/api")
 
 # Security
@@ -62,13 +65,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(status_code=401, detail="Token inválido")
         user = await db.users.find_one({"id": user_id})
         if user is None:
-            raise HTTPException(status_code=401, detail="User not found")
+            raise HTTPException(status_code=401, detail="Usuario no encontrado")
         return user
     except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise HTTPException(status_code=401, detail="Token inválido")
 
 def prepare_for_mongo(data):
     """Convert Python objects to MongoDB-compatible format"""
@@ -114,17 +117,26 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     full_name: str
+    device_id: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    device_id: Optional[str] = None
 
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: EmailStr
     full_name: str
+    plan: str = "free"
+    device_ids: List[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     preferences: Dict[str, Any] = Field(default_factory=dict)
+    assistant_config: Dict[str, Any] = Field(default_factory=lambda: {
+        "name": "Asistente",
+        "photo": "",
+        "tone": "amable"
+    })
 
 class Note(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -139,6 +151,7 @@ class Note(BaseModel):
     updated_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     is_favorite: bool = False
     ai_summary: Optional[str] = None
+    extracted_tasks: List[str] = Field(default_factory=list)
 
 class NoteCreate(BaseModel):
     title: str
@@ -161,6 +174,7 @@ class Event(BaseModel):
     reminder_minutes: int = 15
     recurring: Optional[str] = None
     created_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    notification_sent: bool = False
 
 class EventCreate(BaseModel):
     title: str
@@ -186,6 +200,8 @@ class Task(BaseModel):
     subtasks: List[Dict[str, Any]] = Field(default_factory=list)
     created_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     completed_date: Optional[datetime] = None
+    estimated_time: Optional[int] = None  # minutes
+    actual_time: Optional[int] = None  # minutes
 
 class TaskCreate(BaseModel):
     title: str
@@ -193,6 +209,26 @@ class TaskCreate(BaseModel):
     priority: str = "medium"
     due_date: Optional[datetime] = None
     category: str = "general"
+    estimated_time: Optional[int] = None
+
+class Alarm(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    title: str
+    description: Optional[str] = ""
+    alarm_time: datetime
+    repeat_pattern: Optional[str] = None  # daily, weekly, weekdays, etc.
+    is_active: bool = True
+    snooze_count: int = 0
+    max_snooze: int = 3
+    created_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AlarmCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    alarm_time: datetime
+    repeat_pattern: Optional[str] = None
+    max_snooze: int = 3
 
 class Project(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -203,38 +239,91 @@ class Project(BaseModel):
     file_size: int
     version: str = "1.0.0"
     extracted_info: Dict[str, Any] = Field(default_factory=dict)
+    analysis_status: str = "pending"  # pending, processing, completed, failed
     created_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AutomationRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    name: str
+    description: Optional[str] = ""
+    trigger_type: str  # keyword, time, location, email, etc.
+    trigger_config: Dict[str, Any]
+    action_type: str  # create_task, send_notification, etc.
+    action_config: Dict[str, Any]
+    is_active: bool = True
+    created_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_triggered: Optional[datetime] = None
 
 class ChatMessage(BaseModel):
     text: str
+    context: Optional[str] = None
 
 class ChatResponse(BaseModel):
     response: str
     suggestions: List[str] = Field(default_factory=list)
+    actions: List[Dict[str, Any]] = Field(default_factory=list)
 
-# AI Integration
-async def get_ai_summary(text: str) -> str:
-    """Generate AI summary of text using Emergent LLM"""
+class VoiceCommand(BaseModel):
+    audio_data: str  # base64 encoded
+    command_type: Optional[str] = None
+
+# AI Integration with OpenAI GPT-4o
+async def get_ai_chat(messages: List[Dict[str, str]], system_message: str = None) -> str:
+    """Enhanced AI chat using GPT-4o"""
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
-            return "AI summary unavailable - no API key configured"
+            return "IA no disponible - contacta al administrador"
+        
+        if not system_message:
+            system_message = """Eres un asistente personal inteligente llamado Asistente-Definitivo. Eres muy capaz y puedes:
+            - Responder cualquier pregunta de forma inteligente
+            - Ayudar con tareas y organización personal
+            - Analizar información y documentos
+            - Dar consejos de productividad y gestión del tiempo
+            - Extraer tareas y crear recordatorios automáticamente
+            - Proporcionar análisis detallados de texto y documentos
+            
+            Responde de forma útil, inteligente y personalizada. Usa español y mantén un tono profesional pero amigable."""
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"chat_{uuid.uuid4()}",
+            system_message=system_message
+        ).with_model("openai", "gpt-4o")
+        
+        # Use the last message for the user message
+        last_message = messages[-1]["content"] if messages else ""
+        user_message = UserMessage(text=last_message)
+        response = await chat.send_message(user_message)
+        return response
+    except Exception as e:
+        logging.error(f"AI Chat error: {e}")
+        return f"Disculpa, hubo un error: {str(e)}. Intentaré ayudarte de otra forma."
+
+async def get_ai_summary(text: str) -> str:
+    """Generate AI summary using GPT-4o"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            return "Resumen IA no disponible"
         
         chat = LlmChat(
             api_key=api_key,
             session_id=f"summary_{uuid.uuid4()}",
-            system_message="You are a helpful assistant that creates concise summaries. Keep summaries under 100 words."
-        ).with_model("openai", "gpt-4o-mini")
+            system_message="Eres un experto en crear resúmenes concisos y útiles. Mantén los resúmenes bajo 150 palabras y enfócate en los puntos más importantes."
+        ).with_model("openai", "gpt-4o")
         
-        user_message = UserMessage(text=f"Please summarize this text concisely: {text}")
+        user_message = UserMessage(text=f"Crea un resumen conciso de este texto: {text}")
         response = await chat.send_message(user_message)
         return response
     except Exception as e:
         logging.error(f"AI Summary error: {e}")
-        return "AI summary unavailable"
+        return "Resumen IA no disponible"
 
 async def extract_tasks_from_text(text: str) -> List[Dict[str, str]]:
-    """Extract actionable tasks from text using AI"""
+    """Extract actionable tasks from text using GPT-4o"""
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
@@ -243,60 +332,90 @@ async def extract_tasks_from_text(text: str) -> List[Dict[str, str]]:
         chat = LlmChat(
             api_key=api_key,
             session_id=f"extract_{uuid.uuid4()}",
-            system_message="Extract actionable tasks from text. Return only JSON array with objects containing 'title' and 'description' fields."
-        ).with_model("openai", "gpt-4o-mini")
+            system_message="Extrae tareas accionables de texto. Devuelve SOLO un array JSON con objetos que tengan campos 'title' y 'description'. Si no hay tareas, devuelve un array vacío []."
+        ).with_model("openai", "gpt-4o")
         
-        user_message = UserMessage(text=f"Extract actionable tasks from this text: {text}")
+        user_message = UserMessage(text=f"Extrae las tareas accionables de este texto: {text}")
         response = await chat.send_message(user_message)
         
         try:
-            import json
-            tasks = json.loads(response)
-            return tasks if isinstance(tasks, list) else []
+            # Clean the response to extract JSON
+            json_match = re.search(r'\[.*\]', response, re.DOTALL)
+            if json_match:
+                tasks = json.loads(json_match.group())
+                return tasks if isinstance(tasks, list) else []
+            return []
         except:
             return []
     except Exception as e:
         logging.error(f"Task extraction error: {e}")
         return []
 
-async def ai_chat_response(message: str) -> str:
-    """Generate intelligent chat response"""
+async def analyze_document(content: str, file_type: str) -> Dict[str, Any]:
+    """Analyze document content using GPT-4o"""
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
-            return "IA no disponible - contacta al administrador"
+            return {"error": "Análisis IA no disponible"}
         
         chat = LlmChat(
             api_key=api_key,
-            session_id=f"chat_{uuid.uuid4()}",
-            system_message="""Eres un asistente personal inteligente muy capaz. Puedes:
-            - Responder cualquier pregunta
-            - Ayudar con tareas y organización
-            - Analizar información
-            - Dar consejos de productividad
-            - Procesar texto y extraer información
-            
-            Responde de forma útil, inteligente y personalizada. Usa español."""
-        ).with_model("openai", "gpt-4o-mini")
+            session_id=f"analyze_{uuid.uuid4()}",
+            system_message="Analiza documentos y extrae información estructurada. Devuelve un JSON con: summary, tasks, dates, amounts, contacts, key_points."
+        ).with_model("openai", "gpt-4o")
         
-        user_message = UserMessage(text=message)
+        prompt = f"Analiza este documento ({file_type}) y extrae: resumen, tareas, fechas importantes, montos, contactos y puntos clave. Contenido: {content[:3000]}"
+        user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
-        return response
+        
+        try:
+            # Try to parse as JSON, fallback to structured text
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                return json.loads(json_match.group())
+            else:
+                return {
+                    "summary": response[:500],
+                    "tasks": [],
+                    "dates": [],
+                    "amounts": [],
+                    "contacts": [],
+                    "key_points": [response[:200]]
+                }
+        except:
+            return {
+                "summary": response[:500],
+                "analysis_text": response
+            }
     except Exception as e:
-        logging.error(f"AI Chat error: {e}")
-        return f"Disculpa, hubo un error: {str(e)}. Pero puedo ayudarte con análisis básico y respuestas locales."
+        logging.error(f"Document analysis error: {e}")
+        return {"error": str(e)}
 
 # Authentication Routes
 @api_router.post("/auth/register")
 async def register(user_data: UserCreate):
+    # Check if user already exists
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        # Check device limit for existing user
+        if user_data.device_id and user_data.device_id not in existing_user.get("device_ids", []):
+            if len(existing_user.get("device_ids", [])) >= MAX_ACCOUNTS_PER_USER:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Límite de {MAX_ACCOUNTS_PER_USER} dispositivos alcanzado para esta cuenta"
+                )
+            # Add new device
+            await db.users.update_one(
+                {"id": existing_user["id"]},
+                {"$addToSet": {"device_ids": user_data.device_id}}
+            )
+        raise HTTPException(status_code=400, detail="Email ya registrado")
     
     hashed_password = hash_password(user_data.password)
     user = User(
         email=user_data.email,
-        full_name=user_data.full_name
+        full_name=user_data.full_name,
+        device_ids=[user_data.device_id] if user_data.device_id else []
     )
     user_dict = prepare_for_mongo(user.dict())
     user_dict["password"] = hashed_password
@@ -315,7 +434,20 @@ async def register(user_data: UserCreate):
 async def login(user_data: UserLogin):
     user = await db.users.find_one({"email": user_data.email})
     if not user or not verify_password(user_data.password, user.get("password", "")):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    
+    # Check device limit
+    if user_data.device_id and user_data.device_id not in user.get("device_ids", []):
+        if len(user.get("device_ids", [])) >= MAX_ACCOUNTS_PER_USER:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Límite de {MAX_ACCOUNTS_PER_USER} dispositivos alcanzado"
+            )
+        # Add new device
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$addToSet": {"device_ids": user_data.device_id}}
+        )
     
     access_token = create_access_token(data={"sub": user["id"]})
     
@@ -334,9 +466,11 @@ async def create_note(note_data: NoteCreate, current_user: dict = Depends(get_cu
     )
     note_dict = prepare_for_mongo(note.dict())
     
-    # Generate AI summary for long content
-    if len(note_data.content) > 200:
+    # Generate AI summary and extract tasks for long content
+    if len(note_data.content) > 100:
         note_dict["ai_summary"] = await get_ai_summary(note_data.content)
+        extracted_tasks = await extract_tasks_from_text(note_data.content)
+        note_dict["extracted_tasks"] = [task["title"] for task in extracted_tasks if "title" in task]
     
     await db.notes.insert_one(note_dict)
     return parse_from_mongo(note_dict)
@@ -357,7 +491,8 @@ async def get_notes(
     if search:
         query["$or"] = [
             {"title": {"$regex": search, "$options": "i"}},
-            {"content": {"$regex": search, "$options": "i"}}
+            {"content": {"$regex": search, "$options": "i"}},
+            {"tags": {"$in": [re.compile(search, re.IGNORECASE)]}}
         ]
     
     notes = await db.notes.find(query).sort("created_date", -1).to_list(1000)
@@ -368,13 +503,19 @@ async def update_note(note_id: str, note_data: NoteCreate, current_user: dict = 
     update_data = prepare_for_mongo(note_data.dict())
     update_data["updated_date"] = datetime.now(timezone.utc).isoformat()
     
+    # Re-generate AI analysis if content changed significantly
+    if len(note_data.content) > 100:
+        update_data["ai_summary"] = await get_ai_summary(note_data.content)
+        extracted_tasks = await extract_tasks_from_text(note_data.content)
+        update_data["extracted_tasks"] = [task["title"] for task in extracted_tasks if "title" in task]
+    
     result = await db.notes.update_one(
         {"id": note_id, "user_id": current_user["id"]},
         {"$set": update_data}
     )
     
     if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Note not found")
+        raise HTTPException(status_code=404, detail="Nota no encontrada")
     
     updated_note = await db.notes.find_one({"id": note_id, "user_id": current_user["id"]})
     return parse_from_mongo(updated_note)
@@ -384,9 +525,80 @@ async def delete_note(note_id: str, current_user: dict = Depends(get_current_use
     result = await db.notes.delete_one({"id": note_id, "user_id": current_user["id"]})
     
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Note not found")
+        raise HTTPException(status_code=404, detail="Nota no encontrada")
     
-    return {"message": "Note deleted successfully"}
+    return {"message": "Nota eliminada exitosamente"}
+
+# Tasks Routes
+@api_router.post("/tasks", response_model=Task)
+async def create_task(task_data: TaskCreate, current_user: dict = Depends(get_current_user)):
+    task = Task(
+        user_id=current_user["id"],
+        **task_data.dict()
+    )
+    task_dict = prepare_for_mongo(task.dict())
+    await db.tasks.insert_one(task_dict)
+    return parse_from_mongo(task_dict)
+
+@api_router.get("/tasks", response_model=List[Task])
+async def get_tasks(
+    completed: Optional[bool] = None,
+    priority: Optional[str] = None,
+    category: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {"user_id": current_user["id"]}
+    
+    if completed is not None:
+        query["completed"] = completed
+    if priority:
+        query["priority"] = priority
+    if category:
+        query["category"] = category
+    
+    tasks = await db.tasks.find(query).sort("created_date", -1).to_list(1000)
+    return [parse_from_mongo(task) for task in tasks]
+
+@api_router.put("/tasks/{task_id}/complete")
+async def complete_task(task_id: str, current_user: dict = Depends(get_current_user)):
+    update_data = {
+        "completed": True,
+        "completed_date": datetime.now(timezone.utc).isoformat()
+    }
+    
+    result = await db.tasks.update_one(
+        {"id": task_id, "user_id": current_user["id"]},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    
+    return {"message": "Tarea completada exitosamente"}
+
+@api_router.put("/tasks/{task_id}")
+async def update_task(task_id: str, task_data: TaskCreate, current_user: dict = Depends(get_current_user)):
+    update_data = prepare_for_mongo(task_data.dict())
+    
+    result = await db.tasks.update_one(
+        {"id": task_id, "user_id": current_user["id"]},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    
+    updated_task = await db.tasks.find_one({"id": task_id, "user_id": current_user["id"]})
+    return parse_from_mongo(updated_task)
+
+@api_router.delete("/tasks/{task_id}")
+async def delete_task(task_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.tasks.delete_one({"id": task_id, "user_id": current_user["id"]})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    
+    return {"message": "Tarea eliminada exitosamente"}
 
 # Events/Calendar Routes
 @api_router.post("/events", response_model=Event)
@@ -416,51 +628,72 @@ async def get_events(
     events = await db.events.find(query).sort("start_date", 1).to_list(1000)
     return [parse_from_mongo(event) for event in events]
 
-# Tasks Routes
-@api_router.post("/tasks", response_model=Task)
-async def create_task(task_data: TaskCreate, current_user: dict = Depends(get_current_user)):
-    task = Task(
-        user_id=current_user["id"],
-        **task_data.dict()
-    )
-    task_dict = prepare_for_mongo(task.dict())
-    await db.tasks.insert_one(task_dict)
-    return parse_from_mongo(task_dict)
-
-@api_router.get("/tasks", response_model=List[Task])
-async def get_tasks(
-    completed: Optional[bool] = None,
-    priority: Optional[str] = None,
-    current_user: dict = Depends(get_current_user)
-):
-    query = {"user_id": current_user["id"]}
+@api_router.put("/events/{event_id}")
+async def update_event(event_id: str, event_data: EventCreate, current_user: dict = Depends(get_current_user)):
+    update_data = prepare_for_mongo(event_data.dict())
     
-    if completed is not None:
-        query["completed"] = completed
-    if priority:
-        query["priority"] = priority
-    
-    tasks = await db.tasks.find(query).sort("created_date", -1).to_list(1000)
-    return [parse_from_mongo(task) for task in tasks]
-
-@api_router.put("/tasks/{task_id}/complete")
-async def complete_task(task_id: str, current_user: dict = Depends(get_current_user)):
-    update_data = {
-        "completed": True,
-        "completed_date": datetime.now(timezone.utc).isoformat()
-    }
-    
-    result = await db.tasks.update_one(
-        {"id": task_id, "user_id": current_user["id"]},
+    result = await db.events.update_one(
+        {"id": event_id, "user_id": current_user["id"]},
         {"$set": update_data}
     )
     
     if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(status_code=404, detail="Evento no encontrado")
     
-    return {"message": "Task completed successfully"}
+    updated_event = await db.events.find_one({"id": event_id, "user_id": current_user["id"]})
+    return parse_from_mongo(updated_event)
 
-# Projects/ZIP Management Routes
+@api_router.delete("/events/{event_id}")
+async def delete_event(event_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.events.delete_one({"id": event_id, "user_id": current_user["id"]})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Evento no encontrado")
+    
+    return {"message": "Evento eliminado exitosamente"}
+
+# Alarms Routes
+@api_router.post("/alarms", response_model=Alarm)
+async def create_alarm(alarm_data: AlarmCreate, current_user: dict = Depends(get_current_user)):
+    alarm = Alarm(
+        user_id=current_user["id"],
+        **alarm_data.dict()
+    )
+    alarm_dict = prepare_for_mongo(alarm.dict())
+    await db.alarms.insert_one(alarm_dict)
+    return parse_from_mongo(alarm_dict)
+
+@api_router.get("/alarms", response_model=List[Alarm])
+async def get_alarms(current_user: dict = Depends(get_current_user)):
+    alarms = await db.alarms.find({"user_id": current_user["id"]}).sort("alarm_time", 1).to_list(1000)
+    return [parse_from_mongo(alarm) for alarm in alarms]
+
+@api_router.put("/alarms/{alarm_id}/snooze")
+async def snooze_alarm(alarm_id: str, minutes: int = 10, current_user: dict = Depends(get_current_user)):
+    alarm = await db.alarms.find_one({"id": alarm_id, "user_id": current_user["id"]})
+    if not alarm:
+        raise HTTPException(status_code=404, detail="Alarma no encontrada")
+    
+    if alarm["snooze_count"] >= alarm["max_snooze"]:
+        raise HTTPException(status_code=400, detail="Máximo de snooze alcanzado")
+    
+    # Calculate new alarm time
+    current_time = datetime.fromisoformat(alarm["alarm_time"])
+    new_time = current_time + timedelta(minutes=minutes)
+    
+    await db.alarms.update_one(
+        {"id": alarm_id, "user_id": current_user["id"]},
+        {
+            "$set": {
+                "alarm_time": new_time.isoformat(),
+                "snooze_count": alarm["snooze_count"] + 1
+            }
+        }
+    )
+    
+    return {"message": f"Alarma pospuesta {minutes} minutos"}
+
+# Projects/Document Management
 @api_router.post("/projects/upload")
 async def upload_project(
     file: UploadFile = File(...),
@@ -468,29 +701,43 @@ async def upload_project(
     description: str = Form(""),
     current_user: dict = Depends(get_current_user)
 ):
-    if not file.filename.endswith('.zip'):
-        raise HTTPException(status_code=400, detail="Only ZIP files are allowed")
+    if not file.filename.endswith(('.zip', '.pdf', '.docx', '.txt')):
+        raise HTTPException(status_code=400, detail="Tipo de archivo no soportado")
     
     # Save uploaded file
     file_path = f"/tmp/{uuid.uuid4()}_{file.filename}"
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # Extract project info
+    # Extract and analyze content
     extracted_info = {}
+    file_content = ""
+    
     try:
-        with zipfile.ZipFile(file_path, 'r') as zip_ref:
-            file_list = zip_ref.namelist()
-            extracted_info["files"] = file_list[:50]
-            
-            # Look for README or package.json
-            for filename in file_list:
-                if filename.lower().endswith(('readme.md', 'readme.txt', 'package.json')):
-                    try:
-                        content = zip_ref.read(filename).decode('utf-8')[:1000]
-                        extracted_info[filename] = content
-                    except:
-                        pass
+        if file.filename.endswith('.zip'):
+            with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                file_list = zip_ref.namelist()
+                extracted_info["files"] = file_list[:50]
+                
+                # Look for key files
+                for filename in file_list:
+                    if filename.lower().endswith(('readme.md', 'readme.txt', 'package.json')):
+                        try:
+                            content = zip_ref.read(filename).decode('utf-8')[:2000]
+                            extracted_info[filename] = content
+                            file_content += content + "\n"
+                        except:
+                            pass
+        elif file.filename.endswith('.txt'):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                file_content = f.read()
+        # For PDF and DOCX, we'd need additional libraries
+        
+        # AI Analysis
+        if file_content:
+            analysis = await analyze_document(file_content, file.filename.split('.')[-1])
+            extracted_info["ai_analysis"] = analysis
+        
     except Exception as e:
         extracted_info["error"] = str(e)
     
@@ -501,7 +748,8 @@ async def upload_project(
         description=description,
         file_path=file_path,
         file_size=os.path.getsize(file_path),
-        extracted_info=extracted_info
+        extracted_info=extracted_info,
+        analysis_status="completed" if file_content else "failed"
     )
     
     project_dict = prepare_for_mongo(project.dict())
@@ -517,44 +765,115 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
 # AI Chat Routes
 @api_router.post("/ai/chat", response_model=ChatResponse)
 async def chat_with_ai(message: ChatMessage, current_user: dict = Depends(get_current_user)):
-    """Chat with AI assistant"""
-    response = await ai_chat_response(message.text)
+    """Enhanced AI chat with GPT-4o"""
     
+    # Get recent context if available
+    context_messages = []
+    if message.context:
+        context_messages.append({"role": "user", "content": message.context})
+    context_messages.append({"role": "user", "content": message.text})
+    
+    response = await get_ai_chat(context_messages)
+    
+    # Generate smart suggestions based on response
     suggestions = [
-        "¿Puedes ayudarme a organizar mis tareas?",
+        "¿Puedes ayudarme a organizar mis tareas de hoy?",
         "Extrae tareas de este texto",
-        "Resume esta información",
-        "¿Cómo puedo ser más productivo?"
+        "Crea un resumen de mis notas recientes",
+        "¿Qué eventos tengo esta semana?",
+        "Ayúdame a ser más productivo"
     ]
     
-    return ChatResponse(response=response, suggestions=suggestions)
+    # Generate potential actions based on the conversation
+    actions = []
+    if "tarea" in message.text.lower():
+        actions.append({"type": "create_task", "text": "Crear tarea"})
+    if "recordatorio" in message.text.lower() or "alarma" in message.text.lower():
+        actions.append({"type": "create_alarm", "text": "Crear recordatorio"})
+    if "evento" in message.text.lower() or "cita" in message.text.lower():
+        actions.append({"type": "create_event", "text": "Crear evento"})
+    
+    return ChatResponse(response=response, suggestions=suggestions, actions=actions)
 
 @api_router.post("/ai/extract-tasks")
 async def ai_extract_tasks(
     text: str = Form(...),
+    auto_create: bool = Form(False),
     current_user: dict = Depends(get_current_user)
 ):
     """Extract tasks from text using AI"""
     tasks = await extract_tasks_from_text(text)
     
-    # Auto-create tasks if user wants
     created_tasks = []
-    for task_data in tasks:
-        if "title" in task_data:
-            task = Task(
-                user_id=current_user["id"],
-                title=task_data["title"],
-                description=task_data.get("description", ""),
-                category="ai-extracted"
-            )
-            task_dict = prepare_for_mongo(task.dict())
-            await db.tasks.insert_one(task_dict)
-            created_tasks.append(parse_from_mongo(task_dict))
+    if auto_create:
+        for task_data in tasks:
+            if "title" in task_data:
+                task = Task(
+                    user_id=current_user["id"],
+                    title=task_data["title"],
+                    description=task_data.get("description", ""),
+                    category="ai-extracted",
+                    priority="medium"
+                )
+                task_dict = prepare_for_mongo(task.dict())
+                await db.tasks.insert_one(task_dict)
+                created_tasks.append(parse_from_mongo(task_dict))
     
     return {
         "extracted_tasks": tasks,
-        "created_tasks": created_tasks
+        "created_tasks": created_tasks,
+        "count": len(tasks)
     }
+
+@api_router.post("/ai/analyze-text")
+async def ai_analyze_text(text: str = Form(...), current_user: dict = Depends(get_current_user)):
+    """Comprehensive text analysis"""
+    analysis = await analyze_document(text, "text")
+    
+    # Extract and auto-create tasks if requested
+    if "tasks" in analysis and analysis["tasks"]:
+        for task_title in analysis["tasks"][:5]:  # Limit to 5 auto-tasks
+            task = Task(
+                user_id=current_user["id"],
+                title=task_title,
+                description="Extraída automáticamente del análisis de texto",
+                category="ai-analysis"
+            )
+            task_dict = prepare_for_mongo(task.dict())
+            await db.tasks.insert_one(task_dict)
+    
+    return analysis
+
+# Automation Rules
+@api_router.post("/automation/rules", response_model=AutomationRule)
+async def create_automation_rule(rule_data: dict, current_user: dict = Depends(get_current_user)):
+    rule = AutomationRule(
+        user_id=current_user["id"],
+        **rule_data
+    )
+    rule_dict = prepare_for_mongo(rule.dict())
+    await db.automation_rules.insert_one(rule_dict)
+    return parse_from_mongo(rule_dict)
+
+@api_router.get("/automation/rules")
+async def get_automation_rules(current_user: dict = Depends(get_current_user)):
+    rules = await db.automation_rules.find({"user_id": current_user["id"]}).to_list(1000)
+    return [parse_from_mongo(rule) for rule in rules]
+
+# Assistant Configuration
+@api_router.put("/assistant/config")
+async def update_assistant_config(config: dict, current_user: dict = Depends(get_current_user)):
+    """Update assistant personality and configuration"""
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"assistant_config": config}}
+    )
+    return {"message": "Configuración del asistente actualizada"}
+
+@api_router.get("/assistant/config")
+async def get_assistant_config(current_user: dict = Depends(get_current_user)):
+    user = await db.users.find_one({"id": current_user["id"]})
+    return user.get("assistant_config", {"name": "Asistente", "photo": "", "tone": "amable"})
 
 # Dashboard/Analytics Routes
 @api_router.get("/dashboard/stats")
@@ -566,6 +885,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     events_count = await db.events.count_documents({"user_id": current_user["id"]})
     tasks_count = await db.tasks.count_documents({"user_id": current_user["id"]})
     completed_tasks = await db.tasks.count_documents({"user_id": current_user["id"], "completed": True})
+    projects_count = await db.projects.count_documents({"user_id": current_user["id"]})
     
     # Today's events
     today_events = await db.events.find({
@@ -579,15 +899,88 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "completed": False
     }).limit(10).to_list(10)
     
+    # Recent notes
+    recent_notes = await db.notes.find({
+        "user_id": current_user["id"]
+    }).sort("created_date", -1).limit(5).to_list(5)
+    
     return {
         "notes_count": notes_count,
         "events_count": events_count,
         "tasks_count": tasks_count,
         "completed_tasks": completed_tasks,
+        "projects_count": projects_count,
         "completion_rate": (completed_tasks / tasks_count * 100) if tasks_count > 0 else 0,
         "today_events": [parse_from_mongo(event) for event in today_events],
-        "pending_tasks": [parse_from_mongo(task) for task in pending_tasks]
+        "pending_tasks": [parse_from_mongo(task) for task in pending_tasks],
+        "recent_notes": [parse_from_mongo(note) for note in recent_notes]
     }
+
+# Voice Commands (placeholder for future STT integration)
+@api_router.post("/voice/command")
+async def process_voice_command(command: VoiceCommand, current_user: dict = Depends(get_current_user)):
+    """Process voice commands (placeholder for STT integration)"""
+    return {
+        "message": "Comando de voz procesado",
+        "recognized_text": "Función de voz en desarrollo",
+        "action": "none"
+    }
+
+# Search functionality
+@api_router.get("/search")
+async def global_search(
+    query: str,
+    type: Optional[str] = None,  # notes, tasks, events, projects
+    current_user: dict = Depends(get_current_user)
+):
+    """Global search across all user content"""
+    results = {"notes": [], "tasks": [], "events": [], "projects": []}
+    
+    search_regex = {"$regex": query, "$options": "i"}
+    
+    if not type or type == "notes":
+        notes = await db.notes.find({
+            "user_id": current_user["id"],
+            "$or": [
+                {"title": search_regex},
+                {"content": search_regex},
+                {"tags": search_regex}
+            ]
+        }).limit(20).to_list(20)
+        results["notes"] = [parse_from_mongo(note) for note in notes]
+    
+    if not type or type == "tasks":
+        tasks = await db.tasks.find({
+            "user_id": current_user["id"],
+            "$or": [
+                {"title": search_regex},
+                {"description": search_regex}
+            ]
+        }).limit(20).to_list(20)
+        results["tasks"] = [parse_from_mongo(task) for task in tasks]
+    
+    if not type or type == "events":
+        events = await db.events.find({
+            "user_id": current_user["id"],
+            "$or": [
+                {"title": search_regex},
+                {"description": search_regex},
+                {"location": search_regex}
+            ]
+        }).limit(20).to_list(20)
+        results["events"] = [parse_from_mongo(event) for event in events]
+    
+    if not type or type == "projects":
+        projects = await db.projects.find({
+            "user_id": current_user["id"],
+            "$or": [
+                {"name": search_regex},
+                {"description": search_regex}
+            ]
+        }).limit(20).to_list(20)
+        results["projects"] = [parse_from_mongo(project) for project in projects]
+    
+    return results
 
 # Include router and middleware
 app.include_router(api_router)
@@ -613,4 +1006,12 @@ async def shutdown_db_client():
 
 @api_router.get("/")
 async def root():
-    return {"message": "Personal Assistant API is running!", "version": "1.0.0"}
+    return {"message": "¡Asistente-Definitivo API funcionando!", "version": "2.0.0"}
+
+@api_router.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "2.0.0"
+    }
