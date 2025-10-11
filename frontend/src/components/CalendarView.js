@@ -9,7 +9,7 @@ import {
   Save,
   ChevronLeft,
   ChevronRight,
-  Today,
+  Calendar as CalendarClock,
   Bell
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
