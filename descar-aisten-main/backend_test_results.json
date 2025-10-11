@@ -1,0 +1,140 @@
+{
+  "timestamp": "2025-09-25T23:53:19.463330",
+  "total_tests": 22,
+  "passed_tests": 22,
+  "success_rate": 100.0,
+  "test_details": [
+    {
+      "test": "API Health Check",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "User Registration",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "User Login",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Dashboard Stats",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Create Note",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "AI Summary Generation",
+      "success": "This is a test note designed to generate an AI summary, repeating the same statement multiple times.",
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Get Notes",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Search Notes",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Update Note",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Delete Note",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Create Event",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Get Events",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Create Task",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Get Tasks",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Complete Task",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Create Habit",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Get Habits",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Complete Habit",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Create Alarm",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Get Alarms",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "Global Search",
+      "success": true,
+      "details": "",
+      "response_data": null
+    },
+    {
+      "test": "AI Task Extraction",
+      "success": true,
+      "details": "",
+      "response_data": null
+    }
+  ]
+}
