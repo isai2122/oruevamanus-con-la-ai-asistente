@@ -22,7 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from './ui/checkbox';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay, parseISO } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
