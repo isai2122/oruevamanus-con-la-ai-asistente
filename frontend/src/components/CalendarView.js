@@ -379,7 +379,7 @@ const CalendarView = () => {
         
         <div className="flex items-center gap-3">
           <Button onClick={goToToday} variant="outline" className="btn-secondary" data-testid="today-btn">
-            <Today className="w-4 h-4 mr-2" />
+            <CalendarClock className="w-4 h-4 mr-2" />
             Hoy
           </Button>
           
