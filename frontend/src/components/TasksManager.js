@@ -374,13 +374,13 @@ const TasksManager = () => {
                 </SelectContent>
               </Select>
               
-              <Select value={filterPriority} onValueChange={setFilterPriority}>
+              <Select value={filterPriority || 'all'} onValueChange={(value) => setFilterPriority(value === 'all' ? '' : value)}>
                 <SelectTrigger className="w-40" data-testid="filter-priority-select">
                   <Flag className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Prioridad" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   <SelectItem value="high">Alta</SelectItem>
                   <SelectItem value="medium">Media</SelectItem>
                   <SelectItem value="low">Baja</SelectItem>
