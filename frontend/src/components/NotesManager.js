@@ -297,7 +297,7 @@ const NotesManager = () => {
                   <SelectValue placeholder="Etiqueta" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   {allTags.map(tag => (
                     <SelectItem key={tag} value={tag}>
                       {tag}
