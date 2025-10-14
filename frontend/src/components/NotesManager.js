@@ -282,7 +282,7 @@ const NotesManager = () => {
                   <SelectValue placeholder="Carpeta" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   {allFolders.map(folder => (
                     <SelectItem key={folder} value={folder}>
                       {folder.charAt(0).toUpperCase() + folder.slice(1)}
