@@ -54,8 +54,8 @@ const NotesManager = () => {
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
-      if (selectedFolder) params.append('folder', selectedFolder);
-      if (selectedTag) params.append('tag', selectedTag);
+      if (selectedFolder && selectedFolder !== 'all') params.append('folder', selectedFolder);
+      if (selectedTag && selectedTag !== 'all') params.append('tag', selectedTag);
       
       const response = await axios.get(`${API}/notes?${params}`);
       setNotes(response.data);
