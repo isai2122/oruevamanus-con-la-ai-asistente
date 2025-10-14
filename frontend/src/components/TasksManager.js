@@ -387,12 +387,12 @@ const TasksManager = () => {
                 </SelectContent>
               </Select>
               
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <Select value={filterCategory || 'all'} onValueChange={(value) => setFilterCategory(value === 'all' ? '' : value)}>
                 <SelectTrigger className="w-40" data-testid="filter-category-select">
                   <SelectValue placeholder="Categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   {allCategories.map(category => (
                     <SelectItem key={category} value={category}>
                       {category.charAt(0).toUpperCase() + category.slice(1)}
