@@ -363,12 +363,12 @@ const TasksManager = () => {
             </div>
             
             <div className="flex flex-wrap gap-3 flex-1">
-              <Select value={filterCompleted?.toString() || ''} onValueChange={(value) => setFilterCompleted(value === '' ? null : value === 'true')}>
+              <Select value={filterCompleted?.toString() || 'all'} onValueChange={(value) => setFilterCompleted(value === 'all' ? null : value === 'true')}>
                 <SelectTrigger className="w-40" data-testid="filter-status-select">
                   <SelectValue placeholder="Estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   <SelectItem value="false">Pendientes</SelectItem>
                   <SelectItem value="true">Completadas</SelectItem>
                 </SelectContent>
