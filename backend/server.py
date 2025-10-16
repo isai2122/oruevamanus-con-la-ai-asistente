@@ -268,28 +268,84 @@ class VoiceCommand(BaseModel):
     audio_data: str  # base64 encoded
     command_type: Optional[str] = None
 
-# AI Integration with OpenAI GPT-4o
-async def get_ai_chat(messages: List[Dict[str, str]], system_message: str = None) -> str:
-    """Enhanced AI chat using GPT-4o"""
+# User Context Management
+user_contexts = {}  # Store user conversation context
+
+def get_user_context(user_id: str) -> Dict[str, Any]:
+    """Get user's conversation context and preferences"""
+    if user_id not in user_contexts:
+        user_contexts[user_id] = {
+            "conversation_history": [],
+            "preferences": {},
+            "created_tasks": [],
+            "recent_notes": [],
+            "interaction_patterns": {},
+            "personality_learned": {}
+        }
+    return user_contexts[user_id]
+
+def update_user_context(user_id: str, message: str, response: str, actions_taken: List[Dict] = None):
+    """Update user context with new interaction"""
+    context = get_user_context(user_id)
+    context["conversation_history"].append({
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "user_message": message,
+        "ai_response": response,
+        "actions_taken": actions_taken or []
+    })
+    
+    # Keep only last 50 messages for performance
+    if len(context["conversation_history"]) > 50:
+        context["conversation_history"] = context["conversation_history"][-50:]
+
+# AI Integration with Enhanced Context
+async def get_ai_chat(messages: List[Dict[str, str]], user_id: str, user_data: dict = None) -> Dict[str, Any]:
+    """Enhanced AI chat with personalized context and automatic actions"""
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
-            return "IA no disponible - contacta al administrador"
+            return {"response": "IA no disponible - contacta al administrador", "actions": []}
         
-        if not system_message:
-            system_message = """Eres un asistente personal inteligente llamado Asistente-Definitivo. Eres muy capaz y puedes:
-            - Responder cualquier pregunta de forma inteligente
-            - Ayudar con tareas y organización personal
-            - Analizar información y documentos
-            - Dar consejos de productividad y gestión del tiempo
-            - Extraer tareas y crear recordatorios automáticamente
-            - Proporcionar análisis detallados de texto y documentos
-            
-            Responde de forma útil, inteligente y personalizada. Usa español y mantén un tono profesional pero amigable."""
+        # Get user context and preferences
+        user_context = get_user_context(user_id)
+        assistant_config = user_data.get("assistant_config", {}) if user_data else {}
         
+        # Build personalized system message
+        system_message = f"""Eres {assistant_config.get('name', 'Asistente-Definitivo')}, un asistente personal inteligente y personalizado.
+
+PERSONALIDAD: {assistant_config.get('tone', 'amable').upper()}
+- amable: Sé cálido, empático y cercano
+- formal: Mantén comunicación profesional y directa  
+- energetico: Sé motivador, positivo y entusiasta
+- conciso: Da respuestas breves y al punto
+
+CAPACIDADES PRINCIPALES:
+1. CREAR AUTOMÁTICAMENTE tareas cuando el usuario lo mencione (ej: "tengo que hacer X", "recordar Y")
+2. CREAR AUTOMÁTICAMENTE notas cuando sea apropiado
+3. CREAR AUTOMÁTICAMENTE eventos cuando mencione fechas/horarios
+4. Analizar y resumir información instantáneamente
+5. Extraer información estructurada de textos
+6. Dar consejos personalizados basados en el historial
+
+CONTEXTO DEL USUARIO:
+- Tareas creadas recientemente: {len(user_context.get('created_tasks', []))}
+- Patrones de interacción: {user_context.get('interaction_patterns', {})}
+- Preferencias aprendidas: {user_context.get('personality_learned', {})}
+
+HISTORIAL RECIENTE:
+{chr(10).join([f"Usuario: {h['user_message'][:100]}..." for h in user_context.get('conversation_history', [])[-3:]])}
+
+INSTRUCCIONES CRÍTICAS:
+- SIEMPRE detecta cuando el usuario menciona tareas y responde con actions para crearlas
+- Personaliza completamente tu respuesta según su personalidad y historial
+- Sé proactivo sugiriendo organizaciones y mejoras
+- Aprende de cada interacción para ser más útil
+
+Responde en español de forma natural y útil."""
+
         chat = LlmChat(
             api_key=api_key,
-            session_id=f"chat_{uuid.uuid4()}",
+            session_id=f"user_{user_id}_session",
             system_message=system_message
         ).with_model("openai", "gpt-4o")
         
@@ -297,10 +353,67 @@ async def get_ai_chat(messages: List[Dict[str, str]], system_message: str = None
         last_message = messages[-1]["content"] if messages else ""
         user_message = UserMessage(text=last_message)
         response = await chat.send_message(user_message)
-        return response
+        
+        # Detect and create automatic actions
+        actions_taken = []
+        suggestions = []
+        
+        # Enhanced task detection
+        task_keywords = ['tengo que', 'debo', 'necesito hacer', 'recordar', 'pendiente', 
+                        'tarea', 'hacer', 'completar', 'terminar', 'enviar', 'llamar',
+                        'comprar', 'revisar', 'estudiar', 'preparar']
+        
+        message_lower = last_message.lower()
+        
+        # Auto-create tasks based on natural language
+        if any(keyword in message_lower for keyword in task_keywords):
+            # Extract potential tasks using AI
+            task_extraction_response = await extract_tasks_from_text(last_message)
+            if task_extraction_response:
+                actions_taken.append({
+                    "type": "auto_tasks_detected",
+                    "count": len(task_extraction_response),
+                    "tasks": task_extraction_response
+                })
+        
+        # Generate smart suggestions based on context
+        if 'calendario' in message_lower or 'evento' in message_lower:
+            suggestions.extend([
+                "¿Quieres que cree un evento en tu calendario?",
+                "¿Te ayudo a programar recordatorios?",
+                "¿Revisamos tu agenda de esta semana?"
+            ])
+        
+        if 'nota' in message_lower or 'apuntar' in message_lower:
+            suggestions.extend([
+                "¿Creo una nota con esta información?",
+                "¿Quieres que analice y resuma esto?",
+                "¿Te ayudo a organizar estas ideas?"
+            ])
+        
+        if 'análisis' in message_lower or 'resumir' in message_lower:
+            suggestions.extend([
+                "¿Quieres que analice algún documento?",
+                "¿Te ayudo a extraer información clave?",
+                "¿Necesitas un resumen de tus notas recientes?"
+            ])
+        
+        # Update user context
+        update_user_context(user_id, last_message, response, actions_taken)
+        
+        return {
+            "response": response,
+            "suggestions": suggestions,
+            "actions": actions_taken
+        }
+        
     except Exception as e:
         logging.error(f"AI Chat error: {e}")
-        return f"Disculpa, hubo un error: {str(e)}. Intentaré ayudarte de otra forma."
+        return {
+            "response": f"Disculpa, hubo un error: {str(e)}. Intentaré ayudarte de otra forma.",
+            "suggestions": [],
+            "actions": []
+        }
 
 async def get_ai_summary(text: str) -> str:
     """Generate AI summary using GPT-4o"""
