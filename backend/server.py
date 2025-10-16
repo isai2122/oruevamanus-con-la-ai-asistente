@@ -878,7 +878,10 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
 # AI Chat Routes
 @api_router.post("/ai/chat", response_model=ChatResponse)
 async def chat_with_ai(message: ChatMessage, current_user: dict = Depends(get_current_user)):
-    """Enhanced AI chat with GPT-4o"""
+    """Enhanced AI chat with personalized context and automatic actions"""
+    
+    # Get user's assistant configuration
+    user_full = await db.users.find_one({"id": current_user["id"]})
     
     # Get recent context if available
     context_messages = []
@@ -886,27 +889,65 @@ async def chat_with_ai(message: ChatMessage, current_user: dict = Depends(get_cu
         context_messages.append({"role": "user", "content": message.context})
     context_messages.append({"role": "user", "content": message.text})
     
-    response = await get_ai_chat(context_messages)
+    # Get AI response with enhanced context
+    ai_result = await get_ai_chat(context_messages, current_user["id"], user_full)
     
-    # Generate smart suggestions based on response
-    suggestions = [
-        "¿Puedes ayudarme a organizar mis tareas de hoy?",
-        "Extrae tareas de este texto",
-        "Crea un resumen de mis notas recientes",
-        "¿Qué eventos tengo esta semana?",
-        "Ayúdame a ser más productivo"
-    ]
+    # Auto-create tasks if detected
+    created_tasks = []
+    if ai_result.get("actions"):
+        for action in ai_result["actions"]:
+            if action["type"] == "auto_tasks_detected":
+                for task_data in action["tasks"]:
+                    if "title" in task_data:
+                        task = Task(
+                            user_id=current_user["id"],
+                            title=task_data["title"],
+                            description=task_data.get("description", f"Auto-creada desde conversación: {message.text[:100]}..."),
+                            category="ai-auto",
+                            priority="medium"
+                        )
+                        task_dict = prepare_for_mongo(task.dict())
+                        await db.tasks.insert_one(task_dict)
+                        created_tasks.append(parse_from_mongo(task_dict))
     
-    # Generate potential actions based on the conversation
-    actions = []
-    if "tarea" in message.text.lower():
-        actions.append({"type": "create_task", "text": "Crear tarea"})
-    if "recordatorio" in message.text.lower() or "alarma" in message.text.lower():
-        actions.append({"type": "create_alarm", "text": "Crear recordatorio"})
-    if "evento" in message.text.lower() or "cita" in message.text.lower():
-        actions.append({"type": "create_event", "text": "Crear evento"})
+    # Enhanced suggestions based on user patterns and context
+    personalized_suggestions = ai_result.get("suggestions", [])
+    if not personalized_suggestions:
+        personalized_suggestions = [
+            "¿Qué tienes pendiente para hoy?",
+            "¿Te ayudo a organizar tu agenda?",
+            "¿Quieres que analice algún documento?",
+            "¿Necesitas que extraiga tareas de algo?",
+            "¿Te creo recordatorios para algo importante?"
+        ]
     
-    return ChatResponse(response=response, suggestions=suggestions, actions=actions)
+    # Generate contextual actions
+    contextual_actions = []
+    message_lower = message.text.lower()
+    
+    if any(word in message_lower for word in ['tarea', 'hacer', 'pendiente', 'debo']):
+        contextual_actions.append({"type": "create_task", "text": "Crear tarea ahora"})
+    if any(word in message_lower for word in ['recordar', 'alarma', 'avisar']):
+        contextual_actions.append({"type": "create_alarm", "text": "Crear recordatorio"})
+    if any(word in message_lower for word in ['evento', 'cita', 'reunión', 'calendario']):
+        contextual_actions.append({"type": "create_event", "text": "Crear evento"})
+    if any(word in message_lower for word in ['nota', 'apuntar', 'escribir']):
+        contextual_actions.append({"type": "create_note", "text": "Crear nota"})
+    if any(word in message_lower for word in ['analizar', 'resumir', 'documento']):
+        contextual_actions.append({"type": "analyze_text", "text": "Analizar texto"})
+    
+    # Add info about created tasks to response if any
+    response_text = ai_result["response"]
+    if created_tasks:
+        response_text += f"\n\n✅ He creado automáticamente {len(created_tasks)} tarea(s) basada(s) en nuestra conversación:\n"
+        for i, task in enumerate(created_tasks, 1):
+            response_text += f"{i}. {task['title']}\n"
+    
+    return ChatResponse(
+        response=response_text, 
+        suggestions=personalized_suggestions, 
+        actions=contextual_actions
+    )
 
 @api_router.post("/ai/extract-tasks")
 async def ai_extract_tasks(
