@@ -121,7 +121,6 @@ function App() {
                 <Route path="calendar" element={<CalendarView />} />
                 <Route path="projects" element={<ProjectsManager />} />
                 <Route path="support" element={<SupportCenter />} />
-                <Route path="integrations" element={<IntegrationsHub />} />
                 <Route path="settings" element={<SettingsScreen />} />
               </Route>
             ) : (
