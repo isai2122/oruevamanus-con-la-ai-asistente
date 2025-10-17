@@ -14,6 +14,11 @@ import ProjectsManager from './components/ProjectsManager';
 import AiChat from './components/AiChat';
 import SettingsScreen from './components/SettingsScreen';
 import MainLayout from './components/MainLayout';
+import SmartScheduling from './components/SmartScheduling';
+import HabitTracker from './components/HabitTracker';
+import SmartHome from './components/SmartHome';
+import SupportCenter from './components/SupportCenter';
+import IntegrationsHub from './components/IntegrationsHub';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
