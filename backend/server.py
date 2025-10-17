@@ -633,10 +633,24 @@ async def super_ai_chat(message: dict, current_user: dict = Depends(get_current_
     
     user_full = await db.users.find_one({"id": current_user["id"]})
     
+    # Handle both formats: {message: str, context: list} or {text: str, context: str}
+    user_message = message.get("message") or message.get("text", "")
+    context_data = message.get("context", [])
+    
     context_messages = []
-    if message.get("context"):
-        context_messages.append({"role": "user", "content": message["context"]})
-    context_messages.append({"role": "user", "content": message["text"]})
+    
+    # Process context (can be list or string)
+    if isinstance(context_data, list):
+        for ctx_msg in context_data:
+            if isinstance(ctx_msg, dict):
+                context_messages.append(ctx_msg)
+            elif isinstance(ctx_msg, str):
+                context_messages.append({"role": "user", "content": ctx_msg})
+    elif isinstance(context_data, str) and context_data:
+        context_messages.append({"role": "user", "content": context_data})
+    
+    # Add current message
+    context_messages.append({"role": "user", "content": user_message})
     
     # Get SUPER AI response
     ai_result = await get_super_ai_chat(
