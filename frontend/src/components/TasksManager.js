@@ -61,10 +61,11 @@ const TasksManager = () => {
       if (filterCategory) params.append('category', filterCategory);
       
       const response = await axios.get(`${API}/tasks?${params}`);
-      setTasks(response.data);
+      setTasks(response.data.tasks || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast.error('Error al cargar tareas');
+      setTasks([]);
     } finally {
       setLoading(false);
     }
