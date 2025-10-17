@@ -12,7 +12,12 @@ import {
   Menu,
   X,
   User,
-  Sparkles
+  Sparkles,
+  Zap,
+  Flame,
+  SmartHome,
+  Headphones,
+  Puzzle
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
