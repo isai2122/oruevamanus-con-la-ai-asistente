@@ -80,7 +80,10 @@ const AiChat = () => {
   const [extractTasksOpen, setExtractTasksOpen] = useState(false);
   const [extractText, setExtractText] = useState('');
   const [conversationContext, setConversationContext] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isDragOver, setIsDragOver] = useState(false);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
