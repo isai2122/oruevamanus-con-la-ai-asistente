@@ -66,10 +66,11 @@ const CalendarView = () => {
           end_date: endDate.toISOString()
         }
       });
-      setEvents(response.data);
+      setEvents(response.data.events || []);
     } catch (error) {
       console.error('Error fetching events:', error);
       toast.error('Error al cargar eventos');
+      setEvents([]);
     } finally {
       setLoading(false);
     }
