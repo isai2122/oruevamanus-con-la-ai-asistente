@@ -1135,6 +1135,83 @@ async def delete_event(event_id: str, current_user: dict = Depends(get_current_u
         raise HTTPException(status_code=404, detail="Evento no encontrado")
     return {"message": "Evento eliminado"}
 
+# CRUD Endpoints for Projects
+@api_router.post("/projects/upload")
+async def upload_project(
+    file: UploadFile = File(...),
+    name: str = Form(...),
+    description: str = Form(""),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload a project file"""
+    try:
+        # Create uploads directory if it doesn't exist
+        uploads_dir = Path("/app/uploads")
+        uploads_dir.mkdir(exist_ok=True)
+        
+        # Generate unique filename
+        file_extension = Path(file.filename).suffix
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        file_path = uploads_dir / unique_filename
+        
+        # Save file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Get file size
+        file_size = file_path.stat().st_size
+        
+        # Create project
+        project = Project(
+            user_id=current_user["id"],
+            name=name,
+            description=description,
+            file_name=file.filename,
+            file_path=str(file_path),
+            file_size=file_size,
+            file_type=file.content_type or "application/octet-stream"
+        )
+        
+        project_dict = prepare_for_mongo(project.dict())
+        await db.projects.insert_one(project_dict)
+        
+        return {"message": "Proyecto subido exitosamente", "project": parse_from_mongo(project_dict)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/projects")
+async def get_projects(current_user: dict = Depends(get_current_user)):
+    """Get all projects for user"""
+    projects = await db.projects.find({"user_id": current_user["id"]}).to_list(1000)
+    return {"projects": [parse_from_mongo(project) for project in projects]}
+
+@api_router.get("/projects/{project_id}")
+async def get_project(project_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific project"""
+    project = await db.projects.find_one({"id": project_id, "user_id": current_user["id"]})
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    return {"project": parse_from_mongo(project)}
+
+@api_router.delete("/projects/{project_id}")
+async def delete_project(project_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a project"""
+    project = await db.projects.find_one({"id": project_id, "user_id": current_user["id"]})
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    
+    # Delete file from filesystem
+    try:
+        file_path = Path(project["file_path"])
+        if file_path.exists():
+            file_path.unlink()
+    except Exception as e:
+        print(f"Error deleting file: {e}")
+    
+    # Delete from database
+    await db.projects.delete_one({"id": project_id, "user_id": current_user["id"]})
+    return {"message": "Proyecto eliminado"}
+
 # Dashboard Stats Endpoint
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
