@@ -1,635 +1,100 @@
 {
-  "timestamp": "2025-10-12T21:14:48.610614",
+  "timestamp": "2025-10-17T21:22:28.387270",
   "backend_url": "https://asistente-definitivo.preview.emergentagent.com",
-  "total_tests": 26,
-  "passed_tests": 24,
-  "failed_tests": 2,
-  "success_rate": 92.3076923076923,
+  "total_tests": 15,
+  "passed_tests": 0,
+  "failed_tests": 15,
+  "success_rate": 0.0,
   "test_details": [
     {
       "name": "Root endpoint (/api/)",
       "success": false,
-      "details": "Status: 404",
-      "response_data": {
-        "detail": "Not Found"
-      }
+      "details": "Status: 502",
+      "response_data": {}
     },
     {
       "name": "Health check (/api/health)",
       "success": false,
-      "details": "Status: 404",
-      "response_data": {
-        "detail": "Not Found"
-      }
+      "details": "Status: 502",
+      "response_data": {}
     },
     {
       "name": "User registration",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZWE0Yzg4Ni1lMmQ1LTQ4MWYtYWY2NC02OGZjYjQ0NjNhNWUiLCJleHAiOjE3NjAzNDY4NzV9.RHO3pQ_Tiqbwy0bC0edqNMxCaLnGyAgqAGxaaaxm8fk",
-        "token_type": "bearer",
-        "user": {
-          "id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "email": "test_user_1760303675@example.com",
-          "full_name": "Test User 1760303675",
-          "plan": "free",
-          "device_ids": [
-            "test_device_1760303675"
-          ],
-          "created_at": "2025-10-12T21:14:35.467231+00:00",
-          "preferences": {},
-          "assistant_config": {
-            "name": "Asistente",
-            "photo": "",
-            "tone": "amable"
-          }
-        }
-      }
+      "success": false,
+      "details": "Status: 502",
+      "response_data": {}
     },
     {
       "name": "User login",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZWE0Yzg4Ni1lMmQ1LTQ4MWYtYWY2NC02OGZjYjQ0NjNhNWUiLCJleHAiOjE3NjAzNDY4NzV9.RHO3pQ_Tiqbwy0bC0edqNMxCaLnGyAgqAGxaaaxm8fk",
-        "token_type": "bearer",
-        "user": {
-          "id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "email": "test_user_1760303675@example.com",
-          "full_name": "Test User 1760303675",
-          "plan": "free",
-          "device_ids": [
-            "test_device_1760303675"
-          ],
-          "created_at": "2025-10-12T21:14:35.467231+00:00",
-          "preferences": {},
-          "assistant_config": {
-            "name": "Asistente",
-            "photo": "",
-            "tone": "amable"
-          },
-          "password": "$2b$12$4UkLH076ia5rJRyMXlnaK.CObXUHSPNv9TNle7UFwuvGORifXUuLm"
-        }
-      }
+      "success": false,
+      "details": "Status: 502",
+      "response_data": {}
     },
     {
       "name": "Invalid login rejection",
-      "success": true,
-      "details": "Status: 401",
-      "response_data": {
-        "detail": "Credenciales inv\u00e1lidas"
-      }
+      "success": false,
+      "details": "Status: 502",
+      "response_data": {}
     },
     {
-      "name": "Create note with AI analysis",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "id": "e49ad11f-acdc-4520-9097-98f500cefca3",
-        "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-        "title": "Test Note with AI Analysis",
-        "content": "This is a comprehensive test note that should trigger AI analysis. I need to complete the following tasks: 1. Review the quarterly report, 2. Schedule meeting with team, 3. Update project documentation. The deadline is next Friday and it's very important for the company's success.",
-        "tags": [
-          "test",
-          "important",
-          "ai-analysis"
-        ],
-        "folder": "test",
-        "type": "text",
-        "attachments": [],
-        "created_date": "2025-10-12T21:14:36.022678Z",
-        "updated_date": "2025-10-12T21:14:36.022680Z",
-        "is_favorite": false,
-        "ai_summary": "Este texto detalla tareas esenciales a completar antes del pr\u00f3ximo viernes, un plazo cr\u00edtico para el \u00e9xito de la empresa. Las tareas incluyen revisar el informe trimestral, programar una reuni\u00f3n con el equipo y actualizar la documentaci\u00f3n del proyecto.",
-        "extracted_tasks": [
-          "Review the quarterly report",
-          "Schedule meeting with team",
-          "Update project documentation"
-        ]
-      }
+      "name": "SUPER AI Chat",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "AI summary generation",
-      "success": true,
-      "details": "AI summary present: True",
-      "response_data": {
-        "ai_summary": "Este texto detalla tareas esenciales a completar antes del pr\u00f3ximo viernes, un plazo cr\u00edtico para el \u00e9xito de la empresa. Las tareas incluyen revisar el informe trimestral, programar una reuni\u00f3n con el equipo y actualizar la documentaci\u00f3n del proyecto."
-      }
+      "name": "SUPER Dashboard",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "Task extraction from note",
-      "success": true,
-      "details": "Extracted tasks: 3",
-      "response_data": {
-        "extracted_tasks": [
-          "Review the quarterly report",
-          "Schedule meeting with team",
-          "Update project documentation"
-        ]
-      }
+      "name": "Smart Scheduling",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "Get all notes",
-      "success": true,
-      "details": "Status: 200, Count: 1",
-      "response_data": [
-        {
-          "id": "e49ad11f-acdc-4520-9097-98f500cefca3",
-          "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "title": "Test Note with AI Analysis",
-          "content": "This is a comprehensive test note that should trigger AI analysis. I need to complete the following tasks: 1. Review the quarterly report, 2. Schedule meeting with team, 3. Update project documentation. The deadline is next Friday and it's very important for the company's success.",
-          "tags": [
-            "test",
-            "important",
-            "ai-analysis"
-          ],
-          "folder": "test",
-          "type": "text",
-          "attachments": [],
-          "created_date": "2025-10-12T21:14:36.022678Z",
-          "updated_date": "2025-10-12T21:14:36.022680Z",
-          "is_favorite": false,
-          "ai_summary": "Este texto detalla tareas esenciales a completar antes del pr\u00f3ximo viernes, un plazo cr\u00edtico para el \u00e9xito de la empresa. Las tareas incluyen revisar el informe trimestral, programar una reuni\u00f3n con el equipo y actualizar la documentaci\u00f3n del proyecto.",
-          "extracted_tasks": [
-            "Review the quarterly report",
-            "Schedule meeting with team",
-            "Update project documentation"
-          ]
-        }
-      ]
+      "name": "Habit Tracking",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "Search notes",
-      "success": true,
-      "details": "Status: 200, Results: 1",
-      "response_data": [
-        {
-          "id": "e49ad11f-acdc-4520-9097-98f500cefca3",
-          "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "title": "Test Note with AI Analysis",
-          "content": "This is a comprehensive test note that should trigger AI analysis. I need to complete the following tasks: 1. Review the quarterly report, 2. Schedule meeting with team, 3. Update project documentation. The deadline is next Friday and it's very important for the company's success.",
-          "tags": [
-            "test",
-            "important",
-            "ai-analysis"
-          ],
-          "folder": "test",
-          "type": "text",
-          "attachments": [],
-          "created_date": "2025-10-12T21:14:36.022678Z",
-          "updated_date": "2025-10-12T21:14:36.022680Z",
-          "is_favorite": false,
-          "ai_summary": "Este texto detalla tareas esenciales a completar antes del pr\u00f3ximo viernes, un plazo cr\u00edtico para el \u00e9xito de la empresa. Las tareas incluyen revisar el informe trimestral, programar una reuni\u00f3n con el equipo y actualizar la documentaci\u00f3n del proyecto.",
-          "extracted_tasks": [
-            "Review the quarterly report",
-            "Schedule meeting with team",
-            "Update project documentation"
-          ]
-        }
-      ]
+      "name": "Smart Home Control",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "Update note",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "id": "e49ad11f-acdc-4520-9097-98f500cefca3",
-        "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-        "title": "Updated Test Note",
-        "content": "Updated content with new information",
-        "tags": [
-          "test",
-          "updated"
-        ],
-        "folder": "test",
-        "type": "text",
-        "attachments": [],
-        "created_date": "2025-10-12T21:14:36.022678+00:00",
-        "updated_date": "2025-10-12T21:14:39.066256+00:00",
-        "is_favorite": false,
-        "ai_summary": "Este texto detalla tareas esenciales a completar antes del pr\u00f3ximo viernes, un plazo cr\u00edtico para el \u00e9xito de la empresa. Las tareas incluyen revisar el informe trimestral, programar una reuni\u00f3n con el equipo y actualizar la documentaci\u00f3n del proyecto.",
-        "extracted_tasks": [
-          "Review the quarterly report",
-          "Schedule meeting with team",
-          "Update project documentation"
-        ]
-      }
+      "name": "Support Automation",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "Create task",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "id": "21d91c6a-09be-455e-a76b-dfe25861fc71",
-        "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-        "title": "Test Task with Priority",
-        "description": "This is a test task to verify CRUD operations",
-        "completed": false,
-        "priority": "high",
-        "due_date": "2025-10-19T21:14:39.070961",
-        "category": "test",
-        "subtasks": [],
-        "created_date": "2025-10-12T21:14:39.104036Z",
-        "completed_date": null,
-        "estimated_time": 120,
-        "actual_time": null
-      }
+      "name": "Integrations Manager",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "Get all tasks",
-      "success": true,
-      "details": "Status: 200, Count: 1",
-      "response_data": [
-        {
-          "id": "21d91c6a-09be-455e-a76b-dfe25861fc71",
-          "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "title": "Test Task with Priority",
-          "description": "This is a test task to verify CRUD operations",
-          "completed": false,
-          "priority": "high",
-          "due_date": "2025-10-19T21:14:39.070961",
-          "category": "test",
-          "subtasks": [],
-          "created_date": "2025-10-12T21:14:39.104036Z",
-          "completed_date": null,
-          "estimated_time": 120,
-          "actual_time": null
-        }
-      ]
+      "name": "Notes CRUD",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "Filter tasks by priority",
-      "success": true,
-      "details": "Status: 200, High priority tasks: 1",
-      "response_data": [
-        {
-          "id": "21d91c6a-09be-455e-a76b-dfe25861fc71",
-          "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "title": "Test Task with Priority",
-          "description": "This is a test task to verify CRUD operations",
-          "completed": false,
-          "priority": "high",
-          "due_date": "2025-10-19T21:14:39.070961",
-          "category": "test",
-          "subtasks": [],
-          "created_date": "2025-10-12T21:14:39.104036Z",
-          "completed_date": null,
-          "estimated_time": 120,
-          "actual_time": null
-        }
-      ]
+      "name": "Tasks CRUD",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     },
     {
-      "name": "Complete task",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "message": "Tarea completada exitosamente"
-      }
-    },
-    {
-      "name": "Get completed tasks",
-      "success": true,
-      "details": "Status: 200, Completed tasks: 1",
-      "response_data": [
-        {
-          "id": "21d91c6a-09be-455e-a76b-dfe25861fc71",
-          "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "title": "Test Task with Priority",
-          "description": "This is a test task to verify CRUD operations",
-          "completed": true,
-          "priority": "high",
-          "due_date": "2025-10-19T21:14:39.070961",
-          "category": "test",
-          "subtasks": [],
-          "created_date": "2025-10-12T21:14:39.104036Z",
-          "completed_date": "2025-10-12T21:14:39.221262Z",
-          "estimated_time": 120,
-          "actual_time": null
-        }
-      ]
-    },
-    {
-      "name": "Create calendar event",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "id": "9d0cd603-3306-4d16-9af3-1791465ec449",
-        "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-        "title": "Test Meeting",
-        "description": "Important test meeting",
-        "start_date": "2025-10-13T21:14:39.304154",
-        "end_date": "2025-10-13T23:14:39.304166",
-        "all_day": false,
-        "location": "Conference Room A",
-        "category": "meeting",
-        "color": "#6366f1",
-        "reminder_minutes": 30,
-        "recurring": null,
-        "created_date": "2025-10-12T21:14:39.339876Z",
-        "notification_sent": false
-      }
-    },
-    {
-      "name": "Get all events",
-      "success": true,
-      "details": "Status: 200, Count: 1",
-      "response_data": [
-        {
-          "id": "9d0cd603-3306-4d16-9af3-1791465ec449",
-          "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "title": "Test Meeting",
-          "description": "Important test meeting",
-          "start_date": "2025-10-13T21:14:39.304154",
-          "end_date": "2025-10-13T23:14:39.304166",
-          "all_day": false,
-          "location": "Conference Room A",
-          "category": "meeting",
-          "color": "#6366f1",
-          "reminder_minutes": 30,
-          "recurring": null,
-          "created_date": "2025-10-12T21:14:39.339876Z",
-          "notification_sent": false
-        }
-      ]
-    },
-    {
-      "name": "Get events by date range",
-      "success": true,
-      "details": "Status: 200, Events in range: 1",
-      "response_data": [
-        {
-          "id": "9d0cd603-3306-4d16-9af3-1791465ec449",
-          "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-          "title": "Test Meeting",
-          "description": "Important test meeting",
-          "start_date": "2025-10-13T21:14:39.304154",
-          "end_date": "2025-10-13T23:14:39.304166",
-          "all_day": false,
-          "location": "Conference Room A",
-          "category": "meeting",
-          "color": "#6366f1",
-          "reminder_minutes": 30,
-          "recurring": null,
-          "created_date": "2025-10-12T21:14:39.339876Z",
-          "notification_sent": false
-        }
-      ]
-    },
-    {
-      "name": "AI Chat with GPT-4o",
-      "success": true,
-      "details": "Status: 200, Response length: 1503",
-      "response_data": {
-        "response": "\u00a1Hola! Claro que s\u00ed, supongo que est\u00e1s buscando maximizar tu tiempo y ser lo m\u00e1s eficiente posible. Aqu\u00ed tienes una forma sugerida de organizar tus tareas:\n\n1. **Prioriza las tareas**: Comienza por identificar qu\u00e9 documentos necesitas revisar y su urgencia. Clasifica tus tareas en funci\u00f3n de su importancia y vencimiento.\n\n2. **Bloques de tiempo**: \n   - **Revisi\u00f3n de documentos**: Asigna un bloque de tiempo, preferiblemente por la ma\u00f1ana, cuando tu concentraci\u00f3n suele ser m\u00e1s alta. Aseg\u00farate de tener un espacio sin distracciones.\n   - **Llamadas**: Considera hacerlas en medio del d\u00eda, ya que mantiene un buen balance y es probable que las personas est\u00e9n disponibles. Haz una lista de los temas a tratar antes de cada llamada.\n   - **Preparaci\u00f3n de la presentaci\u00f3n**: Dedica tiempo por la tarde, cuando ya hayas gestionado otras tareas urgentes. Si la presentaci\u00f3n es importante, aseg\u00farate de tener al menos una hora de enfoque ininterrumpido.\n\n3. **Tiempo para descansos**: No olvides programar descansos cortos entre estas actividades para mantener la mente fresca.\n\n4. **Herramientas**: Usa herramientas digitales como calendarios o aplicaciones de gesti\u00f3n de tareas, como Trello o Todoist, para mantener un seguimiento de tus tareas.\n\n5. **Recordatorios autom\u00e1ticos**: Si lo deseas, puedo ayudarte a configurar recordatorios autom\u00e1ticos para cada tarea seg\u00fan el horario que escojas.\n\n\u00bfHay algo espec\u00edfico en lo que te gustar\u00eda profundizar o alg\u00fan detalle adicional que deber\u00eda tener en cuenta?",
-        "suggestions": [
-          "\u00bfPuedes ayudarme a organizar mis tareas de hoy?",
-          "Extrae tareas de este texto",
-          "Crea un resumen de mis notas recientes",
-          "\u00bfQu\u00e9 eventos tengo esta semana?",
-          "Ay\u00fadame a ser m\u00e1s productivo"
-        ],
-        "actions": [
-          {
-            "type": "create_task",
-            "text": "Crear tarea"
-          }
-        ]
-      }
-    },
-    {
-      "name": "AI Task Extraction",
-      "success": true,
-      "details": "Status: 200, Tasks extracted: 4",
-      "response_data": {
-        "extracted_tasks": [
-          {
-            "title": "Revisar el informe trimestral",
-            "description": "Hacer correcciones al informe trimestral."
-          },
-          {
-            "title": "Programar reuni\u00f3n con el equipo de desarrollo",
-            "description": "Programar la reuni\u00f3n para el viernes."
-          },
-          {
-            "title": "Actualizar la documentaci\u00f3n del proyecto",
-            "description": "Actualizar la documentaci\u00f3n antes del lunes."
-          },
-          {
-            "title": "Enviar propuesta al cliente",
-            "description": "Enviar la propuesta al cliente antes del mi\u00e9rcoles."
-          }
-        ],
-        "created_tasks": [],
-        "count": 4
-      }
-    },
-    {
-      "name": "AI Text Analysis",
-      "success": true,
-      "details": "Status: 200, Analysis available: True",
-      "response_data": {
-        "summary": "El documento aborda detalles del proyecto Q4, incluyendo fechas de entregas, contactos principales y el presupuesto asignado.",
-        "tasks": [
-          "Entrega inicial del proyecto",
-          "Revisi\u00f3n del proyecto",
-          "Entrega final del proyecto"
-        ],
-        "dates": [
-          "2023-12-15",
-          "2023-12-22",
-          "2023-12-30"
-        ],
-        "amounts": [
-          "$50,000 USD"
-        ],
-        "contacts": [
-          {
-            "name": "Juan P\u00e9rez",
-            "email": "juan@empresa.com"
-          },
-          {
-            "name": "Mar\u00eda Garc\u00eda",
-            "email": "maria@empresa.com"
-          }
-        ],
-        "key_points": [
-          "Fechas clave para el proyecto: 15, 22, y 30 de diciembre.",
-          "Presupuesto asignado de $50,000 USD.",
-          "Contactos principales: Juan P\u00e9rez y Mar\u00eda Garc\u00eda."
-        ]
-      }
-    },
-    {
-      "name": "Dashboard statistics",
-      "success": true,
-      "details": "Status: 200, Fields present: True",
-      "response_data": {
-        "notes_count": 1,
-        "events_count": 1,
-        "tasks_count": 4,
-        "completed_tasks": 1,
-        "projects_count": 0,
-        "completion_rate": 25.0,
-        "today_events": [],
-        "pending_tasks": [
-          {
-            "id": "3bebabba-7e9d-4f3f-9c45-a2b8a51d1b21",
-            "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-            "title": "Entrega inicial del proyecto",
-            "description": "Extra\u00edda autom\u00e1ticamente del an\u00e1lisis de texto",
-            "completed": false,
-            "priority": "medium",
-            "due_date": null,
-            "category": "ai-analysis",
-            "subtasks": [],
-            "created_date": "2025-10-12T21:14:48.345592+00:00",
-            "completed_date": null,
-            "estimated_time": null,
-            "actual_time": null
-          },
-          {
-            "id": "7d58dd5f-089c-411b-ae00-fb762d27ef82",
-            "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-            "title": "Revisi\u00f3n del proyecto",
-            "description": "Extra\u00edda autom\u00e1ticamente del an\u00e1lisis de texto",
-            "completed": false,
-            "priority": "medium",
-            "due_date": null,
-            "category": "ai-analysis",
-            "subtasks": [],
-            "created_date": "2025-10-12T21:14:48.347024+00:00",
-            "completed_date": null,
-            "estimated_time": null,
-            "actual_time": null
-          },
-          {
-            "id": "ce852f72-cab4-421d-98e7-69a274878ae4",
-            "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-            "title": "Entrega final del proyecto",
-            "description": "Extra\u00edda autom\u00e1ticamente del an\u00e1lisis de texto",
-            "completed": false,
-            "priority": "medium",
-            "due_date": null,
-            "category": "ai-analysis",
-            "subtasks": [],
-            "created_date": "2025-10-12T21:14:48.347512+00:00",
-            "completed_date": null,
-            "estimated_time": null,
-            "actual_time": null
-          }
-        ],
-        "recent_notes": [
-          {
-            "id": "e49ad11f-acdc-4520-9097-98f500cefca3",
-            "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-            "title": "Updated Test Note",
-            "content": "Updated content with new information",
-            "tags": [
-              "test",
-              "updated"
-            ],
-            "folder": "test",
-            "type": "text",
-            "attachments": [],
-            "created_date": "2025-10-12T21:14:36.022678+00:00",
-            "updated_date": "2025-10-12T21:14:39.066256+00:00",
-            "is_favorite": false,
-            "ai_summary": "Este texto detalla tareas esenciales a completar antes del pr\u00f3ximo viernes, un plazo cr\u00edtico para el \u00e9xito de la empresa. Las tareas incluyen revisar el informe trimestral, programar una reuni\u00f3n con el equipo y actualizar la documentaci\u00f3n del proyecto.",
-            "extracted_tasks": [
-              "Review the quarterly report",
-              "Schedule meeting with team",
-              "Update project documentation"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "Global search functionality",
-      "success": true,
-      "details": "Status: 200, Categories: ['notes', 'tasks', 'events', 'projects']",
-      "response_data": {
-        "notes": [
-          {
-            "id": "e49ad11f-acdc-4520-9097-98f500cefca3",
-            "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-            "title": "Updated Test Note",
-            "content": "Updated content with new information",
-            "tags": [
-              "test",
-              "updated"
-            ],
-            "folder": "test",
-            "type": "text",
-            "attachments": [],
-            "created_date": "2025-10-12T21:14:36.022678+00:00",
-            "updated_date": "2025-10-12T21:14:39.066256+00:00",
-            "is_favorite": false,
-            "ai_summary": "Este texto detalla tareas esenciales a completar antes del pr\u00f3ximo viernes, un plazo cr\u00edtico para el \u00e9xito de la empresa. Las tareas incluyen revisar el informe trimestral, programar una reuni\u00f3n con el equipo y actualizar la documentaci\u00f3n del proyecto.",
-            "extracted_tasks": [
-              "Review the quarterly report",
-              "Schedule meeting with team",
-              "Update project documentation"
-            ]
-          }
-        ],
-        "tasks": [
-          {
-            "id": "21d91c6a-09be-455e-a76b-dfe25861fc71",
-            "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-            "title": "Test Task with Priority",
-            "description": "This is a test task to verify CRUD operations",
-            "completed": true,
-            "priority": "high",
-            "due_date": "2025-10-19T21:14:39.070961",
-            "category": "test",
-            "subtasks": [],
-            "created_date": "2025-10-12T21:14:39.104036+00:00",
-            "completed_date": "2025-10-12T21:14:39.221262+00:00",
-            "estimated_time": 120,
-            "actual_time": null
-          }
-        ],
-        "events": [
-          {
-            "id": "9d0cd603-3306-4d16-9af3-1791465ec449",
-            "user_id": "2ea4c886-e2d5-481f-af64-68fcb4463a5e",
-            "title": "Test Meeting",
-            "description": "Important test meeting",
-            "start_date": "2025-10-13T21:14:39.304154",
-            "end_date": "2025-10-13T23:14:39.304166",
-            "all_day": false,
-            "location": "Conference Room A",
-            "category": "meeting",
-            "color": "#6366f1",
-            "reminder_minutes": 30,
-            "recurring": null,
-            "created_date": "2025-10-12T21:14:39.339876+00:00",
-            "notification_sent": false
-          }
-        ],
-        "projects": []
-      }
-    },
-    {
-      "name": "Get assistant configuration",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "name": "Asistente",
-        "photo": "",
-        "tone": "amable"
-      }
-    },
-    {
-      "name": "Update assistant configuration",
-      "success": true,
-      "details": "Status: 200",
-      "response_data": {
-        "message": "Configuraci\u00f3n del asistente actualizada"
-      }
+      "name": "Calendar Events",
+      "success": false,
+      "details": "No authentication token available",
+      "response_data": null
     }
   ]
 }
