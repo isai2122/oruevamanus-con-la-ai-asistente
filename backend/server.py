@@ -906,6 +906,244 @@ async def get_super_dashboard(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# CRUD Endpoints for Notes
+@api_router.post("/notes")
+async def create_note(note_data: dict, current_user: dict = Depends(get_current_user)):
+    """Create a new note"""
+    try:
+        note = Note(
+            user_id=current_user["id"],
+            title=note_data["title"],
+            content=note_data["content"],
+            tags=note_data.get("tags", []),
+            folder=note_data.get("folder", "general"),
+            type=note_data.get("type", "text")
+        )
+        
+        # Generate AI summary if content is long enough
+        if len(note.content) > 100:
+            note.ai_summary = await get_ai_summary(note.content)
+            
+        # Extract tasks from content
+        note.extracted_tasks = await extract_tasks_from_text(note.content)
+        
+        note_dict = prepare_for_mongo(note.dict())
+        await db.notes.insert_one(note_dict)
+        
+        return {"message": "Nota creada", "note": parse_from_mongo(note_dict)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/notes")
+async def get_notes(current_user: dict = Depends(get_current_user)):
+    """Get all notes for user"""
+    notes = await db.notes.find({"user_id": current_user["id"]}).to_list(1000)
+    return {"notes": [parse_from_mongo(note) for note in notes]}
+
+@api_router.get("/notes/{note_id}")
+async def get_note(note_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific note"""
+    note = await db.notes.find_one({"id": note_id, "user_id": current_user["id"]})
+    if not note:
+        raise HTTPException(status_code=404, detail="Nota no encontrada")
+    return {"note": parse_from_mongo(note)}
+
+@api_router.put("/notes/{note_id}")
+async def update_note(note_id: str, note_data: dict, current_user: dict = Depends(get_current_user)):
+    """Update a note"""
+    try:
+        note = await db.notes.find_one({"id": note_id, "user_id": current_user["id"]})
+        if not note:
+            raise HTTPException(status_code=404, detail="Nota no encontrada")
+        
+        update_data = prepare_for_mongo(note_data)
+        update_data["updated_date"] = datetime.now(timezone.utc).isoformat()
+        
+        # Regenerate AI summary if content changed
+        if "content" in note_data and len(note_data["content"]) > 100:
+            update_data["ai_summary"] = await get_ai_summary(note_data["content"])
+            update_data["extracted_tasks"] = await extract_tasks_from_text(note_data["content"])
+        
+        await db.notes.update_one(
+            {"id": note_id, "user_id": current_user["id"]},
+            {"$set": update_data}
+        )
+        
+        updated_note = await db.notes.find_one({"id": note_id})
+        return {"message": "Nota actualizada", "note": parse_from_mongo(updated_note)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/notes/{note_id}")
+async def delete_note(note_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a note"""
+    result = await db.notes.delete_one({"id": note_id, "user_id": current_user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Nota no encontrada")
+    return {"message": "Nota eliminada"}
+
+# CRUD Endpoints for Tasks
+@api_router.post("/tasks")
+async def create_task(task_data: dict, current_user: dict = Depends(get_current_user)):
+    """Create a new task"""
+    try:
+        task = Task(
+            user_id=current_user["id"],
+            title=task_data["title"],
+            description=task_data.get("description", ""),
+            priority=task_data.get("priority", "medium"),
+            category=task_data.get("category", "general"),
+            due_date=datetime.fromisoformat(task_data["due_date"]) if task_data.get("due_date") else None,
+            estimated_time=task_data.get("estimated_time"),
+            subtasks=task_data.get("subtasks", [])
+        )
+        
+        task_dict = prepare_for_mongo(task.dict())
+        await db.tasks.insert_one(task_dict)
+        
+        return {"message": "Tarea creada", "task": parse_from_mongo(task_dict)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/tasks")
+async def get_tasks(current_user: dict = Depends(get_current_user)):
+    """Get all tasks for user"""
+    tasks = await db.tasks.find({"user_id": current_user["id"]}).to_list(1000)
+    return {"tasks": [parse_from_mongo(task) for task in tasks]}
+
+@api_router.get("/tasks/{task_id}")
+async def get_task(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific task"""
+    task = await db.tasks.find_one({"id": task_id, "user_id": current_user["id"]})
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    return {"task": parse_from_mongo(task)}
+
+@api_router.put("/tasks/{task_id}")
+async def update_task(task_id: str, task_data: dict, current_user: dict = Depends(get_current_user)):
+    """Update a task"""
+    try:
+        task = await db.tasks.find_one({"id": task_id, "user_id": current_user["id"]})
+        if not task:
+            raise HTTPException(status_code=404, detail="Tarea no encontrada")
+        
+        update_data = prepare_for_mongo(task_data)
+        
+        # Update completion date if task is being marked as completed
+        if task_data.get("completed") and not task.get("completed"):
+            update_data["completed_date"] = datetime.now(timezone.utc).isoformat()
+        
+        await db.tasks.update_one(
+            {"id": task_id, "user_id": current_user["id"]},
+            {"$set": update_data}
+        )
+        
+        updated_task = await db.tasks.find_one({"id": task_id})
+        return {"message": "Tarea actualizada", "task": parse_from_mongo(updated_task)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/tasks/{task_id}")
+async def delete_task(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a task"""
+    result = await db.tasks.delete_one({"id": task_id, "user_id": current_user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    return {"message": "Tarea eliminada"}
+
+# CRUD Endpoints for Events
+@api_router.post("/events")
+async def create_event(event_data: dict, current_user: dict = Depends(get_current_user)):
+    """Create a new calendar event"""
+    try:
+        event = Event(
+            user_id=current_user["id"],
+            title=event_data["title"],
+            description=event_data.get("description", ""),
+            start_date=datetime.fromisoformat(event_data["start_date"]),
+            end_date=datetime.fromisoformat(event_data["end_date"]),
+            all_day=event_data.get("all_day", False),
+            location=event_data.get("location", ""),
+            category=event_data.get("category", "general"),
+            color=event_data.get("color", "#3b82f6"),
+            reminder_minutes=event_data.get("reminder_minutes", 15),
+            recurring=event_data.get("recurring"),
+            attendees=event_data.get("attendees", [])
+        )
+        
+        event_dict = prepare_for_mongo(event.dict())
+        await db.events.insert_one(event_dict)
+        
+        return {"message": "Evento creado", "event": parse_from_mongo(event_dict)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/events")
+async def get_events(current_user: dict = Depends(get_current_user)):
+    """Get all events for user"""
+    events = await db.events.find({"user_id": current_user["id"]}).to_list(1000)
+    return {"events": [parse_from_mongo(event) for event in events]}
+
+@api_router.get("/events/{event_id}")
+async def get_event(event_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific event"""
+    event = await db.events.find_one({"id": event_id, "user_id": current_user["id"]})
+    if not event:
+        raise HTTPException(status_code=404, detail="Evento no encontrado")
+    return {"event": parse_from_mongo(event)}
+
+@api_router.put("/events/{event_id}")
+async def update_event(event_id: str, event_data: dict, current_user: dict = Depends(get_current_user)):
+    """Update an event"""
+    try:
+        event = await db.events.find_one({"id": event_id, "user_id": current_user["id"]})
+        if not event:
+            raise HTTPException(status_code=404, detail="Evento no encontrado")
+        
+        update_data = prepare_for_mongo(event_data)
+        
+        await db.events.update_one(
+            {"id": event_id, "user_id": current_user["id"]},
+            {"$set": update_data}
+        )
+        
+        updated_event = await db.events.find_one({"id": event_id})
+        return {"message": "Evento actualizado", "event": parse_from_mongo(updated_event)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/events/{event_id}")
+async def delete_event(event_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete an event"""
+    result = await db.events.delete_one({"id": event_id, "user_id": current_user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Evento no encontrado")
+    return {"message": "Evento eliminado"}
+
+# Dashboard Stats Endpoint
+@api_router.get("/dashboard/stats")
+async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
+    """Get dashboard statistics - used for auth check and basic stats"""
+    try:
+        tasks = await db.tasks.find({"user_id": current_user["id"]}).to_list(1000)
+        events = await db.events.find({"user_id": current_user["id"]}).to_list(1000)
+        notes = await db.notes.find({"user_id": current_user["id"]}).to_list(1000)
+        
+        completed_tasks = len([t for t in tasks if t.get("completed")])
+        total_tasks = len(tasks)
+        
+        return {
+            "user": parse_from_mongo(current_user),
+            "stats": {
+                "total_tasks": total_tasks,
+                "completed_tasks": completed_tasks,
+                "total_events": len(events),
+                "total_notes": len(notes)
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include router and setup
 app.include_router(api_router)
 
