@@ -38,7 +38,6 @@ const MainLayout = () => {
     { name: 'Calendario', href: '/calendar', icon: Calendar },
     { name: 'Proyectos', href: '/projects', icon: FolderOpen },
     { name: 'Soporte', href: '/support', icon: Headphones },
-    { name: 'Integraciones', href: '/integrations', icon: Puzzle },
     { name: 'Configuración', href: '/settings', icon: Settings },
   ];
 
