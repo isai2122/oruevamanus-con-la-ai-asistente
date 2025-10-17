@@ -352,23 +352,39 @@ const AiChat = () => {
     
     for (let file of uploadedFiles) {
       try {
-        if (file.type.startsWith('image/')) {
-          // For images, we would need to implement OCR or image analysis
-          analysisResults += `📸 Imagen: ${file.name} - Análisis visual en desarrollo\\n`;
-        } else if (file.type === 'text/plain') {
-          // Read text file
-          const text = await file.text();
-          const response = await axios.post(`${API}/ai/analyze-text`, 
-            new URLSearchParams({ text: text.substring(0, 5000) }),
-            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-          );
-          analysisResults += `📄 ${file.name}: ${response.data.summary || 'Análisis completado'}\\n`;
-        } else {
-          analysisResults += `📎 ${file.name} - Archivo cargado para análisis\\n`;
+        // Determine action based on message context
+        const shouldSaveToProjects = inputMessage.toLowerCase().includes('guarda') || 
+                                      inputMessage.toLowerCase().includes('guardar') ||
+                                      inputMessage.toLowerCase().includes('proyecto');
+        
+        const action = shouldSaveToProjects ? 'both' : 'analyze';
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('action', action);
+        if (shouldSaveToProjects) {
+          formData.append('project_name', file.name);
         }
+        
+        // Upload and analyze
+        const response = await axios.post(`${API}/ai/analyze-document`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        if (response.data.saved_to_projects) {
+          toast.success(`✅ ${file.name} guardado en Proyectos`);
+          analysisResults += `\n📁 **Guardado en Proyectos**: ${file.name}\n`;
+        }
+        
+        analysisResults += `\n📄 **${file.name}**\n${response.data.analysis}\n\n`;
+        
       } catch (error) {
         console.error('Error analyzing file:', file.name, error);
-        analysisResults += `❌ Error analizando ${file.name}\\n`;
+        analysisResults += `❌ Error analizando ${file.name}\n`;
+        toast.error(`Error procesando ${file.name}`);
       }
     }
     
