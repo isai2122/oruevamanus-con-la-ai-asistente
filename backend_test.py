@@ -383,102 +383,295 @@ class AsistenteDefinitivoTester:
             data
         )
 
-    def test_ai_features(self):
-        """Test AI-powered features"""
-        print("\n🔍 Testing AI Features...")
+    def test_super_ai_chat(self):
+        """Test SUPER AI Chat with GPT-4o (CRITICAL)"""
+        print("\n🔍 Testing SUPER AI Chat...")
         
         if not self.token:
-            self.log_test("AI Features", False, "No authentication token available")
+            self.log_test("SUPER AI Chat", False, "No authentication token available")
             return
         
-        # Test AI Chat
+        # Test 1: Simple AI Chat
         chat_data = {
-            "text": "Hola, ¿puedes ayudarme a organizar mis tareas de hoy? Necesito revisar documentos, hacer llamadas y preparar una presentación.",
-            "context": "Usuario solicitando ayuda con organización"
+            "text": "Hola, ¿puedes ayudarme a organizar mi día de trabajo? Necesito ser muy productivo hoy.",
+            "context": "Usuario solicitando ayuda con productividad"
         }
         
-        success, status_code, data = self.make_request('POST', '/ai/chat', chat_data)
+        success, status_code, data = self.make_request('POST', '/ai/super-chat', chat_data)
         chat_success = success and status_code == 200 and 'response' in data
         self.log_test(
-            "AI Chat with GPT-4o",
+            "SUPER AI Chat - Basic interaction",
             chat_success,
             f"Status: {status_code}, Response length: {len(data.get('response', '')) if chat_success else 0}" if success else str(status_code),
             data
         )
         
-        # Test task extraction
-        extract_text = "Necesito completar las siguientes actividades esta semana: 1. Revisar el informe trimestral y hacer correcciones, 2. Programar reunión con el equipo de desarrollo para el viernes, 3. Actualizar la documentación del proyecto antes del lunes, 4. Enviar propuesta al cliente antes del miércoles."
+        # Test 2: Automatic task detection
+        task_detection_data = {
+            "text": "tengo que comprar leche mañana y también necesito llamar al dentista para agendar una cita",
+            "context": "Detección automática de tareas"
+        }
         
-        # Using form data as expected by the endpoint
-        import urllib.parse
-        form_data = urllib.parse.urlencode({
-            'text': extract_text,
-            'auto_create': 'false'
-        })
+        success, status_code, data = self.make_request('POST', '/ai/super-chat', task_detection_data)
+        task_detection_success = success and status_code == 200 and 'actions' in data
+        has_auto_tasks = any(action.get('type') == 'auto_tasks_detected' for action in data.get('actions', []))
         
-        headers = {'Authorization': f'Bearer {self.token}', 'Content-Type': 'application/x-www-form-urlencoded'}
+        self.log_test(
+            "SUPER AI Chat - Automatic task detection",
+            task_detection_success and has_auto_tasks,
+            f"Status: {status_code}, Auto tasks detected: {has_auto_tasks}" if success else str(status_code),
+            data
+        )
         
-        try:
-            response = requests.post(f"{API_BASE}/ai/extract-tasks", data=form_data, headers=headers)
-            extract_success = response.status_code == 200
-            extract_data = response.json() if response.content else {}
-            
-            self.log_test(
-                "AI Task Extraction",
-                extract_success and 'extracted_tasks' in extract_data,
-                f"Status: {response.status_code}, Tasks extracted: {len(extract_data.get('extracted_tasks', []))}" if extract_success else f"Status: {response.status_code}",
-                extract_data
-            )
-        except Exception as e:
-            self.log_test("AI Task Extraction", False, f"Request failed: {str(e)}")
+        # Test 3: Smart scheduling detection
+        scheduling_data = {
+            "text": "necesito agendar reunión el viernes con mi equipo para revisar el proyecto",
+            "context": "Detección de programación inteligente"
+        }
         
-        # Test text analysis
-        analysis_text = "Este documento contiene información importante sobre el proyecto Q4. Las fechas clave son: 15 de diciembre para la entrega inicial, 22 de diciembre para revisión, y 30 de diciembre para entrega final. Los contactos principales son Juan Pérez (juan@empresa.com) y María García (maria@empresa.com). El presupuesto asignado es de $50,000 USD."
+        success, status_code, data = self.make_request('POST', '/ai/super-chat', scheduling_data)
+        scheduling_success = success and status_code == 200 and 'actions' in data
+        has_scheduling = any(action.get('type') == 'smart_scheduling' for action in data.get('actions', []))
         
-        form_data = urllib.parse.urlencode({'text': analysis_text})
-        
-        try:
-            response = requests.post(f"{API_BASE}/ai/analyze-text", data=form_data, headers=headers)
-            analysis_success = response.status_code == 200
-            analysis_data = response.json() if response.content else {}
-            
-            self.log_test(
-                "AI Text Analysis",
-                analysis_success and ('summary' in analysis_data or 'analysis_text' in analysis_data),
-                f"Status: {response.status_code}, Analysis available: {bool(analysis_data.get('summary') or analysis_data.get('analysis_text'))}" if analysis_success else f"Status: {response.status_code}",
-                analysis_data
-            )
-        except Exception as e:
-            self.log_test("AI Text Analysis", False, f"Request failed: {str(e)}")
+        self.log_test(
+            "SUPER AI Chat - Smart scheduling detection",
+            scheduling_success and has_scheduling,
+            f"Status: {status_code}, Scheduling detected: {has_scheduling}" if success else str(status_code),
+            data
+        )
 
-    def test_dashboard_stats(self):
-        """Test dashboard statistics"""
-        print("\n🔍 Testing Dashboard Statistics...")
+    def test_super_dashboard(self):
+        """Test SUPER Dashboard with advanced metrics (HIGH)"""
+        print("\n🔍 Testing SUPER Dashboard...")
         
         if not self.token:
-            self.log_test("Dashboard Stats", False, "No authentication token available")
+            self.log_test("SUPER Dashboard", False, "No authentication token available")
             return
         
-        success, status_code, data = self.make_request('GET', '/dashboard/stats')
-        stats_success = success and status_code == 200
+        success, status_code, data = self.make_request('GET', '/super/dashboard')
+        dashboard_success = success and status_code == 200
         
-        if stats_success:
-            required_fields = ['notes_count', 'tasks_count', 'events_count', 'projects_count', 'completion_rate']
-            has_all_fields = all(field in data for field in required_fields)
+        if dashboard_success:
+            # Check for super metrics
+            super_metrics = data.get('super_metrics', {})
+            required_fields = ['productivity_score', 'tasks_completed', 'total_tasks', 'active_habits', 
+                             'connected_devices', 'active_integrations', 'notes_count', 'events_count']
+            has_all_fields = all(field in super_metrics for field in required_fields)
+            
+            # Check for AI insights
+            has_ai_insights = 'ai_insights' in data and isinstance(data['ai_insights'], list)
+            has_quick_actions = 'quick_actions' in data and isinstance(data['quick_actions'], list)
             
             self.log_test(
-                "Dashboard statistics",
-                has_all_fields,
-                f"Status: {status_code}, Fields present: {has_all_fields}" if success else str(status_code),
+                "SUPER Dashboard - Advanced metrics",
+                has_all_fields and has_ai_insights and has_quick_actions,
+                f"Status: {status_code}, Metrics: {has_all_fields}, AI Insights: {has_ai_insights}, Quick Actions: {has_quick_actions}" if success else str(status_code),
                 data
             )
         else:
             self.log_test(
-                "Dashboard statistics",
+                "SUPER Dashboard - Advanced metrics",
                 False,
                 f"Status: {status_code}" if success else str(status_code),
                 data
             )
+
+    def test_smart_scheduling(self):
+        """Test Smart Scheduling (Motion-style) (HIGH)"""
+        print("\n🔍 Testing Smart Scheduling...")
+        
+        if not self.token:
+            self.log_test("Smart Scheduling", False, "No authentication token available")
+            return
+        
+        schedule_data = {
+            "date": "2024-12-20",
+            "type": "daily"
+        }
+        
+        success, status_code, data = self.make_request('POST', '/super/smart-schedule', schedule_data)
+        schedule_success = success and status_code == 200 and 'schedule' in data
+        
+        if schedule_success:
+            schedule = data.get('schedule', {})
+            has_optimization = 'optimization_score' in schedule
+            has_tips = 'optimization_tips' in data and isinstance(data['optimization_tips'], list)
+            
+            self.log_test(
+                "Smart Scheduling - AI optimization",
+                has_optimization and has_tips,
+                f"Status: {status_code}, Optimization: {has_optimization}, Tips: {len(data.get('optimization_tips', []))}" if success else str(status_code),
+                data
+            )
+        else:
+            self.log_test(
+                "Smart Scheduling - AI optimization",
+                False,
+                f"Status: {status_code}" if success else str(status_code),
+                data
+            )
+
+    def test_habit_tracking(self):
+        """Test Habit Tracking (Reclaim-style) (HIGH)"""
+        print("\n🔍 Testing Habit Tracking...")
+        
+        if not self.token:
+            self.log_test("Habit Tracking", False, "No authentication token available")
+            return
+        
+        # Create habit with auto-scheduling
+        habit_data = {
+            "name": "Ejercicio matutino",
+            "description": "30 minutos de ejercicio cada mañana",
+            "frequency": "daily",
+            "duration_minutes": 30,
+            "auto_schedule": True
+        }
+        
+        success, status_code, data = self.make_request('POST', '/super/habits', habit_data)
+        create_success = success and status_code == 200 and 'habit' in data
+        
+        self.log_test(
+            "Habit Tracking - Create habit with auto-scheduling",
+            create_success,
+            f"Status: {status_code}" if success else str(status_code),
+            data
+        )
+        
+        # Get habits
+        success, status_code, data = self.make_request('GET', '/super/habits')
+        get_success = success and status_code == 200 and 'habits' in data
+        
+        self.log_test(
+            "Habit Tracking - Get habits list",
+            get_success,
+            f"Status: {status_code}, Habits count: {len(data.get('habits', [])) if get_success else 0}" if success else str(status_code),
+            data
+        )
+
+    def test_smart_home_control(self):
+        """Test Smart Home Control (Alexa-style) (MEDIUM)"""
+        print("\n🔍 Testing Smart Home Control...")
+        
+        if not self.token:
+            self.log_test("Smart Home Control", False, "No authentication token available")
+            return
+        
+        # Add smart device
+        device_data = {
+            "name": "Luz Sala Principal",
+            "type": "light",
+            "room": "sala",
+            "brand": "philips_hue",
+            "device_id": "hue_light_001"
+        }
+        
+        success, status_code, data = self.make_request('POST', '/super/smart-home/device', device_data)
+        device_success = success and status_code == 200 and 'device' in data
+        
+        self.log_test(
+            "Smart Home - Add device",
+            device_success,
+            f"Status: {status_code}" if success else str(status_code),
+            data
+        )
+        
+        if device_success:
+            device_id = data['device']['id']
+            
+            # Control device
+            control_data = {
+                "device_id": device_id,
+                "command": "encender luz al 80%"
+            }
+            
+            success, status_code, data = self.make_request('POST', '/super/smart-home/control', control_data)
+            control_success = success and status_code == 200 and data.get('status') == 'success'
+            
+            self.log_test(
+                "Smart Home - Control device",
+                control_success,
+                f"Status: {status_code}" if success else str(status_code),
+                data
+            )
+
+    def test_support_automation(self):
+        """Test Support Automation (eesel AI-style) (MEDIUM)"""
+        print("\n🔍 Testing Support Automation...")
+        
+        if not self.token:
+            self.log_test("Support Automation", False, "No authentication token available")
+            return
+        
+        ticket_data = {
+            "title": "Problema con sincronización de calendario",
+            "description": "Mi calendario no se está sincronizando correctamente con Google Calendar. Los eventos nuevos no aparecen y hay duplicados.",
+            "category": "integration"
+        }
+        
+        success, status_code, data = self.make_request('POST', '/super/support/ticket', ticket_data)
+        ticket_success = success and status_code == 200 and 'ticket' in data
+        
+        if ticket_success:
+            has_ai_analysis = 'ai_analysis' in data['ticket']
+            has_auto_response = 'auto_response' in data
+            
+            self.log_test(
+                "Support Automation - AI ticket analysis",
+                has_ai_analysis and has_auto_response,
+                f"Status: {status_code}, AI Analysis: {has_ai_analysis}, Auto Response: {has_auto_response}" if success else str(status_code),
+                data
+            )
+        else:
+            self.log_test(
+                "Support Automation - AI ticket analysis",
+                False,
+                f"Status: {status_code}" if success else str(status_code),
+                data
+            )
+
+    def test_integrations_manager(self):
+        """Test Integrations Manager (100+ services) (MEDIUM)"""
+        print("\n🔍 Testing Integrations Manager...")
+        
+        if not self.token:
+            self.log_test("Integrations Manager", False, "No authentication token available")
+            return
+        
+        # Add integration
+        integration_data = {
+            "service_name": "google_calendar",
+            "service_type": "calendar",
+            "credentials": {
+                "api_key": "test_api_key_123",
+                "refresh_token": "test_refresh_token"
+            },
+            "settings": {
+                "sync_frequency": "real_time",
+                "auto_create_events": True
+            }
+        }
+        
+        success, status_code, data = self.make_request('POST', '/super/integrations', integration_data)
+        create_success = success and status_code == 200 and 'integration' in data
+        
+        self.log_test(
+            "Integrations Manager - Add integration",
+            create_success,
+            f"Status: {status_code}" if success else str(status_code),
+            data
+        )
+        
+        # Get integrations
+        success, status_code, data = self.make_request('GET', '/super/integrations')
+        get_success = success and status_code == 200 and 'integrations' in data
+        
+        self.log_test(
+            "Integrations Manager - Get integrations",
+            get_success,
+            f"Status: {status_code}, Integrations count: {len(data.get('integrations', [])) if get_success else 0}" if success else str(status_code),
+            data
+        )
 
     def test_search_functionality(self):
         """Test global search functionality"""
