@@ -304,6 +304,84 @@ const AiChat = () => {
     });
   };
 
+  const handleFileUpload = async (files) => {
+    const validFiles = [];
+    
+    for (let file of files) {
+      // Validate file type and size
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      
+      if (!validTypes.includes(file.type)) {
+        toast.error(`Tipo de archivo no soportado: ${file.name}`);
+        continue;
+      }
+      
+      if (file.size > maxSize) {
+        toast.error(`Archivo muy grande: ${file.name}. Máximo 10MB`);
+        continue;
+      }
+      
+      validFiles.push(file);
+    }
+    
+    if (validFiles.length > 0) {
+      setUploadedFiles(prev => [...prev, ...validFiles]);
+      toast.success(`${validFiles.length} archivo(s) listo(s) para análisis IA`);
+    }
+  };
+
+  const removeFile = (index) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const analyzeUploadedFiles = async () => {
+    if (uploadedFiles.length === 0) return '';
+    
+    let analysisResults = '';
+    
+    for (let file of uploadedFiles) {
+      try {
+        if (file.type.startsWith('image/')) {
+          // For images, we would need to implement OCR or image analysis
+          analysisResults += `📸 Imagen: ${file.name} - Análisis visual en desarrollo\\n`;
+        } else if (file.type === 'text/plain') {
+          // Read text file
+          const text = await file.text();
+          const response = await axios.post(`${API}/ai/analyze-text`, 
+            new URLSearchParams({ text: text.substring(0, 5000) }),
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+          );
+          analysisResults += `📄 ${file.name}: ${response.data.summary || 'Análisis completado'}\\n`;
+        } else {
+          analysisResults += `📎 ${file.name} - Archivo cargado para análisis\\n`;
+        }
+      } catch (error) {
+        console.error('Error analyzing file:', file.name, error);
+        analysisResults += `❌ Error analizando ${file.name}\\n`;
+      }
+    }
+    
+    return analysisResults;
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = Array.from(e.dataTransfer.files);
+    handleFileUpload(files);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
   const formatTimestamp = (timestamp) => {
     return format(new Date(timestamp), 'HH:mm', { locale: es });
   };
