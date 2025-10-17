@@ -272,6 +272,21 @@ class Event(BaseModel):
     meeting_link: Optional[str] = None
     attendees: List[str] = Field(default_factory=list)
 
+class Project(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    name: str
+    description: Optional[str] = ""
+    file_name: str
+    file_path: str
+    file_size: int
+    file_type: str
+    status: str = "active"
+    created_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    ai_analysis: Optional[Dict[str, Any]] = None
+    tags: List[str] = Field(default_factory=list)
+
 # AI Context Management (Enhanced)
 user_contexts = {}
 
