@@ -51,10 +51,11 @@ const ProjectsManager = () => {
   const fetchProjects = async () => {
     try {
       const response = await axios.get(`${API}/projects`);
-      setProjects(response.data);
+      setProjects(Array.isArray(response.data) ? response.data : response.data.projects || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast.error('Error al cargar proyectos');
+      setProjects([]);
     } finally {
       setLoading(false);
     }
