@@ -14,7 +14,11 @@ import {
   Copy,
   Download,
   Loader,
-  Plus
+  Plus,
+  Zap,
+  MessageCircle,
+  Target,
+  PenTool
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -27,22 +31,38 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useAuth } from '../App';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const AiChat = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([
     {
       id: 1,
       type: 'ai',
-      content: '¡Hola! Soy tu Asistente-Definitivo con IA. Puedo ayudarte a organizar tareas, analizar textos, extraer información y mucho más. ¿En qué puedo ayudarte hoy?',
+      content: `¡Hola ${user?.full_name?.split(' ')[0] || 'amigo'}! 👋 Soy tu Asistente-Definitivo con IA avanzada. 
+
+🚀 Puedo ayudarte con CUALQUIER COSA:
+• **Crear tareas automáticamente** - solo dime "tengo que hacer X" y las creo
+• **Tomar notas inteligentes** - convierte conversaciones en notas organizadas
+• **Analizar documentos** - extraigo información clave de cualquier texto
+• **Organizar tu día** - sugiero horarios y prioridades personalizadas
+• **Recordar todo** - nunca más olvides algo importante
+
+💡 **¡Prueba ahora!** Dime algo como:
+- "Tengo que llamar al doctor mañana"
+- "Necesito comprar leche y pan"
+- "Recordar enviar el reporte el viernes"
+
+¿En qué te ayudo hoy?`,
       timestamp: new Date(),
       suggestions: [
-        '¿Puedes ayudarme a organizar mi día?',
-        'Extrae tareas de este texto',
-        'Crea un resumen de mis notas',
-        'Analiza este documento'
+        '¡Organiza mi día de hoy!',
+        'Tengo varias cosas pendientes...',
+        'Ayúdame a ser más productivo',
+        '¿Qué debería hacer primero?'
       ]
     }
   ]);
@@ -53,6 +73,7 @@ const AiChat = () => {
   const [analysisText, setAnalysisText] = useState('');
   const [extractTasksOpen, setExtractTasksOpen] = useState(false);
   const [extractText, setExtractText] = useState('');
+  const [conversationContext, setConversationContext] = useState([]);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -77,10 +98,14 @@ const AiChat = () => {
     setInputMessage('');
     setIsLoading(true);
 
+    // Update conversation context
+    const newContext = [...conversationContext, message].slice(-10); // Keep last 10 messages
+    setConversationContext(newContext);
+
     try {
       const response = await axios.post(`${API}/ai/chat`, {
         text: message,
-        context: messages.slice(-5).map(msg => msg.content).join('\n')
+        context: newContext.join('\n')
       });
 
       const aiMessage = {
@@ -88,11 +113,18 @@ const AiChat = () => {
         type: 'ai',
         content: response.data.response,
         timestamp: new Date(),
-        suggestions: response.data.suggestions,
-        actions: response.data.actions
+        suggestions: response.data.suggestions || [],
+        actions: response.data.actions || [],
+        autoCreated: response.data.response.includes('He creado automáticamente')
       };
 
       setMessages(prev => [...prev, aiMessage]);
+      
+      // Show success if tasks were auto-created
+      if (aiMessage.autoCreated) {
+        toast.success('¡Tareas creadas automáticamente desde la conversación!');
+      }
+      
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Error al enviar mensaje');
@@ -100,14 +132,40 @@ const AiChat = () => {
       const errorMessage = {
         id: Date.now() + 1,
         type: 'ai',
-        content: 'Disculpa, hubo un error al procesar tu mensaje. ¿Podrías intentarlo de nuevo?',
-        timestamp: new Date()
+        content: 'Disculpa, hubo un error al procesar tu mensaje. 🤔 ¿Podrías intentarlo de nuevo? Estoy aquí para ayudarte con tareas, notas, análisis y organización.',
+        timestamp: new Date(),
+        suggestions: [
+          'Intenta de nuevo',
+          '¿Qué tareas tienes pendientes?',
+          'Ayúdame a organizarme'
+        ]
       };
       
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleQuickAction = async (actionType, content = '') => {
+    let message = '';
+    switch (actionType) {
+      case 'create_task':
+        message = `Quiero crear una tarea: ${content || inputMessage}`;
+        break;
+      case 'create_note':
+        message = `Necesito tomar una nota sobre: ${content || inputMessage}`;
+        break;
+      case 'organize_day':
+        message = 'Ayúdame a organizar mi día de hoy con mis tareas pendientes';
+        break;
+      case 'analyze_productivity':
+        message = '¿Cómo puedo ser más productivo? Analiza mis patrones';
+        break;
+      default:
+        message = content;
+    }
+    await sendMessage(message);
   };
 
   const handleAnalyzeText = async () => {
@@ -125,15 +183,20 @@ const AiChat = () => {
       const analysisMessage = {
         id: Date.now(),
         type: 'ai',
-        content: `He analizado tu texto. Aquí están los resultados:\n\n**Resumen:** ${response.data.summary || 'No disponible'}\n\n**Tareas extraídas:** ${response.data.tasks?.length || 0}\n**Fechas encontradas:** ${response.data.dates?.length || 0}\n**Contactos:** ${response.data.contacts?.length || 0}\n**Puntos clave:** ${response.data.key_points?.length || 0}`,
+        content: `📊 **Análisis Completo del Texto:**\n\n${response.data.summary ? `**📝 Resumen:**\n${response.data.summary}\n\n` : ''}${response.data.tasks?.length ? `**✅ Tareas Extraídas (${response.data.tasks.length}):**\n${response.data.tasks.map((task, i) => `${i + 1}. ${task}`).join('\n')}\n\n` : ''}${response.data.dates?.length ? `**📅 Fechas Importantes (${response.data.dates.length}):**\n${response.data.dates.join(', ')}\n\n` : ''}${response.data.key_points?.length ? `**🔑 Puntos Clave:**\n${response.data.key_points.map((point, i) => `• ${point}`).join('\n')}` : ''}`,
         timestamp: new Date(),
-        analysisData: response.data
+        analysisData: response.data,
+        suggestions: [
+          '¿Crear estas tareas automáticamente?',
+          '¿Necesitas más análisis?',
+          '¿Quieres que organice esto mejor?'
+        ]
       };
       
       setMessages(prev => [...prev, analysisMessage]);
       setIsAnalysisOpen(false);
       setAnalysisText('');
-      toast.success('Análisis completado');
+      toast.success('Análisis completado con IA avanzada');
     } catch (error) {
       console.error('Error analyzing text:', error);
       toast.error('Error al analizar texto');
@@ -158,10 +221,19 @@ const AiChat = () => {
       const tasksMessage = {
         id: Date.now(),
         type: 'ai',
-        content: `He extraído ${response.data.count} tareas de tu texto${autoCreate ? ' y las he creado automáticamente' : ''}:\n\n${response.data.extracted_tasks.map((task, i) => `${i + 1}. **${task.title}**${task.description ? `\n   - ${task.description}` : ''}`).join('\n\n')}`,
+        content: `🎯 **Extracción Inteligente Completada:**\n\n**${response.data.count} tareas detectadas${autoCreate ? ' y creadas automáticamente' : ''}:**\n\n${response.data.extracted_tasks.map((task, i) => `${i + 1}. **${task.title}**${task.description ? `\n   📋 ${task.description}` : ''}${autoCreate ? ' ✅' : ''}`).join('\n\n')}${autoCreate ? '\n\n🚀 **¡Todas las tareas han sido añadidas a tu lista automáticamente!**' : '\n\n💡 *¿Quieres que las cree automáticamente en tu lista de tareas?*'}`,
         timestamp: new Date(),
         extractedTasks: response.data.extracted_tasks,
-        createdTasks: response.data.created_tasks
+        createdTasks: response.data.created_tasks,
+        suggestions: autoCreate ? [
+          '¿Organizar estas tareas por prioridad?',
+          '¿Añadir fechas límite?',
+          '¿Qué hago primero?'
+        ] : [
+          'Sí, crear todas automáticamente',
+          '¿Revisar las tareas detectadas?',
+          '¿Analizar más texto?'
+        ]
       };
       
       setMessages(prev => [...prev, tasksMessage]);
@@ -169,9 +241,9 @@ const AiChat = () => {
       setExtractText('');
       
       if (autoCreate && response.data.created_tasks?.length > 0) {
-        toast.success(`${response.data.created_tasks.length} tareas creadas automáticamente`);
+        toast.success(`🎉 ${response.data.created_tasks.length} tareas creadas automáticamente`);
       } else {
-        toast.success('Tareas extraídas exitosamente');
+        toast.success('✨ Tareas extraídas con IA inteligente');
       }
     } catch (error) {
       console.error('Error extracting tasks:', error);
@@ -190,11 +262,13 @@ const AiChat = () => {
       
       recognition.onstart = () => {
         setIsListening(true);
+        toast.success('🎤 Escuchando... habla ahora');
       };
       
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         setInputMessage(transcript);
+        toast.success(`Texto reconocido: "${transcript}"`);
         setIsListening(false);
       };
       
@@ -215,7 +289,7 @@ const AiChat = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      toast.success('Copiado al portapapeles');
+      toast.success('📋 Copiado al portapapeles');
     }).catch(() => {
       toast.error('Error al copiar');
     });
@@ -227,32 +301,43 @@ const AiChat = () => {
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="ai-chat">
-      {/* Header */}
+      {/* Header with Enhanced Info */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Chat con IA</h1>
-          <p className="text-slate-600">Conversa con tu asistente inteligente powered by GPT-4o</p>
+          <h1 className="text-3xl font-bold gradient-text mb-2">Chat IA Inteligente 🧠</h1>
+          <p className="text-slate-600">Tu asistente personal que entiende, aprende y se adapta a ti • Powered by GPT-4o</p>
         </div>
         
         <div className="flex items-center gap-3">
+          {/* Quick Actions */}
+          <Button 
+            onClick={() => handleQuickAction('organize_day')}
+            variant="outline" 
+            className="btn-secondary" 
+            data-testid="quick-organize-btn"
+          >
+            <Target className="w-4 h-4 mr-2" />
+            Organizar Día
+          </Button>
+          
           <Dialog open={extractTasksOpen} onOpenChange={setExtractTasksOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="btn-secondary" data-testid="extract-tasks-btn">
                 <CheckSquare className="w-4 h-4 mr-2" />
-                Extraer Tareas
+                Extraer Tareas IA
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Extraer Tareas con IA</DialogTitle>
+                <DialogTitle>🤖 Extracción Inteligente de Tareas</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Texto para analizar</label>
+                  <label className="text-sm font-medium text-slate-700">Texto para analizar con IA</label>
                   <Textarea
                     value={extractText}
                     onChange={(e) => setExtractText(e.target.value)}
-                    placeholder="Pega o escribe el texto del que quieres extraer tareas..."
+                    placeholder="Pega cualquier texto, email, mensaje, notas... La IA detectará automáticamente todas las tareas y acciones pendientes.\n\nEjemplo: 'Reunión con cliente lunes, enviar propuesta antes del miércoles, llamar a proveedor para cotización...'"
                     rows={8}
                     className="modern-input resize-none"
                     data-testid="extract-text-input"
@@ -263,10 +348,12 @@ const AiChat = () => {
                     Cancelar
                   </Button>
                   <Button onClick={() => handleExtractTasks(false)} className="btn-secondary" data-testid="extract-only-btn">
-                    Solo Extraer
+                    <Brain className="w-4 h-4 mr-2" />
+                    Solo Detectar
                   </Button>
                   <Button onClick={() => handleExtractTasks(true)} className="btn-modern" data-testid="extract-create-btn">
-                    Extraer y Crear
+                    <Zap className="w-4 h-4 mr-2" />
+                    Detectar y Crear
                   </Button>
                 </div>
               </div>
@@ -277,20 +364,20 @@ const AiChat = () => {
             <DialogTrigger asChild>
               <Button className="btn-modern" data-testid="analyze-text-btn">
                 <Brain className="w-4 h-4 mr-2" />
-                Analizar Texto
+                Análisis IA
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Análisis Inteligente de Texto</DialogTitle>
+                <DialogTitle>🔍 Análisis Inteligente Completo</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Texto para analizar</label>
+                  <label className="text-sm font-medium text-slate-700">Texto para análisis profundo</label>
                   <Textarea
                     value={analysisText}
                     onChange={(e) => setAnalysisText(e.target.value)}
-                    placeholder="Pega o escribe el texto que quieres que analice la IA..."
+                    placeholder="La IA analizará automáticamente y extraerá:\n• Resumen inteligente\n• Tareas y acciones\n• Fechas importantes\n• Contactos y datos clave\n• Insights y recomendaciones"
                     rows={8}
                     className="modern-input resize-none"
                     data-testid="analysis-text-input"
@@ -301,8 +388,8 @@ const AiChat = () => {
                     Cancelar
                   </Button>
                   <Button onClick={handleAnalyzeText} className="btn-modern" data-testid="submit-analysis-btn">
-                    <Brain className="w-4 h-4 mr-2" />
-                    Analizar
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Analizar con IA
                   </Button>
                 </div>
               </div>
@@ -311,28 +398,37 @@ const AiChat = () => {
         </div>
       </div>
 
-      {/* Chat Container */}
-      <Card className="modern-card h-[600px] flex flex-col">
+      {/* Enhanced Chat Container */}
+      <Card className="modern-card h-[650px] flex flex-col shadow-xl">
         {/* Messages Area */}
         <ScrollArea className="flex-1 p-6" data-testid="chat-messages">
           <div className="space-y-6">
             {messages.map((message) => (
               <div key={message.id} className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {message.type === 'ai' && (
-                  <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-5 h-5 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <Brain className="w-6 h-6 text-white" />
                   </div>
                 )}
                 
-                <div className={`max-w-[80%] ${message.type === 'user' ? 'order-1' : ''}`}>
-                  <div className={`p-4 rounded-2xl ${
+                <div className={`max-w-[85%] ${message.type === 'user' ? 'order-1' : ''}`}>
+                  <div className={`p-4 rounded-2xl shadow-sm ${
                     message.type === 'user' 
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white' 
-                      : 'bg-slate-50 text-slate-900'
+                      : 'bg-white border border-slate-200 text-slate-900'
                   }`}>
                     <div className="whitespace-pre-wrap text-sm leading-relaxed">
                       {message.content}
                     </div>
+                    
+                    {message.autoCreated && (
+                      <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2 text-green-700 text-xs font-semibold">
+                          <CheckSquare className="w-3 h-3" />
+                          Acción automática completada
+                        </div>
+                      </div>
+                    )}
                     
                     {message.type === 'ai' && (
                       <div className="flex justify-end mt-3">
@@ -353,12 +449,21 @@ const AiChat = () => {
                     <span className="text-xs text-slate-500">
                       {formatTimestamp(message.timestamp)}
                     </span>
+                    {message.type === 'ai' && (
+                      <Badge variant="secondary" className="text-xs">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        GPT-4o
+                      </Badge>
+                    )}
                   </div>
                   
-                  {/* Suggestions */}
+                  {/* Enhanced Suggestions */}
                   {message.suggestions && message.suggestions.length > 0 && (
                     <div className="mt-4 space-y-2">
-                      <p className="text-xs font-medium text-slate-600">Sugerencias:</p>
+                      <p className="text-xs font-medium text-slate-600 flex items-center gap-1">
+                        <Lightbulb className="w-3 h-3" />
+                        Sugerencias inteligentes:
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {message.suggestions.map((suggestion, index) => (
                           <Button
@@ -366,7 +471,7 @@ const AiChat = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => sendMessage(suggestion)}
-                            className="text-xs h-8"
+                            className="text-xs h-8 hover:bg-indigo-50 hover:border-indigo-300"
                             data-testid={`suggestion-${index}`}
                           >
                             {suggestion}
@@ -376,21 +481,26 @@ const AiChat = () => {
                     </div>
                   )}
                   
-                  {/* Action Buttons */}
+                  {/* Enhanced Action Buttons */}
                   {message.actions && message.actions.length > 0 && (
                     <div className="mt-4 space-y-2">
-                      <p className="text-xs font-medium text-slate-600">Acciones rápidas:</p>
+                      <p className="text-xs font-medium text-slate-600 flex items-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        Acciones rápidas:
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {message.actions.map((action, index) => {
                           const Icon = action.type === 'create_task' ? CheckSquare : 
-                                     action.type === 'create_event' ? Calendar : 
+                                     action.type === 'create_event' ? Calendar :
+                                     action.type === 'create_note' ? PenTool :
                                      action.type === 'create_alarm' ? Clock : Plus;
                           return (
                             <Button
                               key={index}
                               variant="secondary"
                               size="sm"
-                              className="text-xs h-8"
+                              onClick={() => handleQuickAction(action.type, '')}
+                              className="text-xs h-8 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200"
                               data-testid={`action-${action.type}-${index}`}
                             >
                               <Icon className="w-3 h-3 mr-2" />
@@ -404,8 +514,8 @@ const AiChat = () => {
                 </div>
                 
                 {message.type === 'user' && (
-                  <div className="w-10 h-10 bg-gradient-to-r from-slate-400 to-slate-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <User className="w-5 h-5 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-slate-400 to-slate-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <User className="w-6 h-6 text-white" />
                   </div>
                 )}
               </div>
@@ -413,13 +523,13 @@ const AiChat = () => {
             
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Brain className="w-5 h-5 text-white" />
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Brain className="w-6 h-6 text-white" />
                 </div>
-                <div className="bg-slate-50 text-slate-900 p-4 rounded-2xl">
+                <div className="bg-white border border-slate-200 text-slate-900 p-4 rounded-2xl shadow-sm">
                   <div className="flex items-center gap-2">
                     <Loader className="w-4 h-4 animate-spin" />
-                    <span className="text-sm">Pensando...</span>
+                    <span className="text-sm">Analizando con IA avanzada...</span>
                   </div>
                 </div>
               </div>
@@ -429,16 +539,50 @@ const AiChat = () => {
           </div>
         </ScrollArea>
         
-        {/* Input Area */}
-        <div className="p-6 border-t border-slate-200">
+        {/* Enhanced Input Area */}
+        <div className="p-6 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+          {/* Quick Action Buttons */}
+          <div className="flex gap-2 mb-4 flex-wrap">
+            <Button
+              onClick={() => sendMessage('Tengo varias tareas pendientes, ayúdame a organizarlas')}
+              variant="outline"
+              size="sm"
+              className="text-xs h-8"
+              data-testid="quick-organize"
+            >
+              <Target className="w-3 h-3 mr-1" />
+              Organizar tareas
+            </Button>
+            <Button
+              onClick={() => sendMessage('¿Qué debería hacer primero hoy?')}
+              variant="outline"
+              size="sm"
+              className="text-xs h-8"
+              data-testid="quick-priority"
+            >
+              <Lightbulb className="w-3 h-3 mr-1" />
+              Prioridades
+            </Button>
+            <Button
+              onClick={() => sendMessage('Ayúdame a ser más productivo')}
+              variant="outline"
+              size="sm"
+              className="text-xs h-8"
+              data-testid="quick-productivity"
+            >
+              <Zap className="w-3 h-3 mr-1" />
+              Productividad
+            </Button>
+          </div>
+          
           <div className="flex gap-3 items-end">
             <div className="flex-1">
               <Textarea
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Escribe tu mensaje aquí... ¿En qué puedo ayudarte?"
+                placeholder="💬 Escribe cualquier cosa... 'Tengo que hacer X', 'Recordar Y', '¿Cómo organizo Z?'\n\n🤖 Soy muy inteligente y entiendo contexto natural. ¡Pruébame!"
                 rows={3}
-                className="modern-input resize-none"
+                className="modern-input resize-none border-2 border-indigo-200 focus:border-indigo-400"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -456,36 +600,36 @@ const AiChat = () => {
                 disabled={isListening || isLoading}
                 variant="outline"
                 size="sm"
-                className={`h-10 w-10 p-0 ${isListening ? 'bg-red-50 border-red-200' : ''}`}
+                className={`h-12 w-12 p-0 ${isListening ? 'bg-red-50 border-red-200' : 'hover:bg-indigo-50'}`}
                 data-testid="voice-input-btn"
               >
                 {isListening ? (
-                  <MicOff className="w-4 h-4 text-red-600" />
+                  <MicOff className="w-5 h-5 text-red-600 animate-pulse" />
                 ) : (
-                  <Mic className="w-4 h-4" />
+                  <Mic className="w-5 h-5" />
                 )}
               </Button>
               
               <Button
                 onClick={() => sendMessage()}
                 disabled={!inputMessage.trim() || isLoading}
-                className="h-10 w-10 p-0 btn-modern"
+                className="h-12 w-12 p-0 btn-modern shadow-lg"
                 data-testid="send-message-btn"
               >
                 {isLoading ? (
-                  <Loader className="w-4 h-4 animate-spin" />
+                  <Loader className="w-5 h-5 animate-spin" />
                 ) : (
-                  <Send className="w-4 h-4" />
+                  <Send className="w-5 h-5" />
                 )}
               </Button>
             </div>
           </div>
           
           <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-            <span>Presiona Enter para enviar, Shift+Enter para nueva línea</span>
+            <span>Enter = enviar • Shift+Enter = nueva línea • 🎤 = dictado por voz</span>
             <div className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              <span>Powered by GPT-4o</span>
+              <span>IA Contextual GPT-4o • Clave Emergent</span>
             </div>
           </div>
         </div>
