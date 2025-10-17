@@ -15,7 +15,6 @@ import {
   Sparkles,
   Zap,
   Flame,
-  SmartHome,
   Headphones,
   Puzzle
 } from 'lucide-react';
