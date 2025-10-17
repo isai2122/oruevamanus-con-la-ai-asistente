@@ -32,11 +32,16 @@ const MainLayout = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'Chat IA', href: '/chat', icon: MessageCircle },
+    { name: 'Programación IA', href: '/smart-scheduling', icon: Zap },
+    { name: 'Hábitos', href: '/habits', icon: Flame },
+    { name: 'Hogar Inteligente', href: '/smart-home', icon: SmartHome },
     { name: 'Notas', href: '/notes', icon: FileText },
     { name: 'Tareas', href: '/tasks', icon: CheckSquare },
     { name: 'Calendario', href: '/calendar', icon: Calendar },
     { name: 'Proyectos', href: '/projects', icon: FolderOpen },
-    { name: 'Chat IA', href: '/chat', icon: MessageCircle },
+    { name: 'Soporte', href: '/support', icon: Headphones },
+    { name: 'Integraciones', href: '/integrations', icon: Puzzle },
     { name: 'Configuración', href: '/settings', icon: Settings },
   ];
 
