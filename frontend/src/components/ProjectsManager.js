@@ -434,6 +434,15 @@ const ProjectsManager = () => {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => handleDownload(project.id, project.file_name)}
+                      className="h-8 w-8 p-0 text-slate-500 hover:text-indigo-600"
+                      title="Descargar archivo"
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDelete(project.id)}
                       className="h-8 w-8 p-0 text-slate-500 hover:text-red-600"
                       data-testid={`delete-project-${index}`}
