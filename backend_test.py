@@ -768,40 +768,74 @@ class AsistenteDefinitivoTester:
                 print(f"❌ Failed to delete event {event_id}")
 
     def run_all_tests(self):
-        """Run all test suites"""
-        print("🚀 Starting Asistente-Definitivo Backend API Tests")
+        """Run all test suites in priority order"""
+        print("🚀 Starting Asistente-Definitivo SUPER Backend API Tests")
         print(f"🔗 Testing against: {BACKEND_URL}")
         print("=" * 60)
         
-        # Run test suites
+        # Run test suites in PRIORITY ORDER as requested
+        print("🔥 CRITICAL PRIORITY TESTS")
         self.test_health_check()
-        self.test_authentication()
+        self.test_authentication()  # CRITICAL - Must work first
+        self.test_super_ai_chat()   # CRITICAL - AI Chat SUPER with GPT-4o
+        
+        print("\n🎯 HIGH PRIORITY TESTS")
+        self.test_super_dashboard()  # HIGH - Super Dashboard with metrics
+        self.test_smart_scheduling() # HIGH - Smart Scheduling (Motion-style)
+        self.test_habit_tracking()   # HIGH - Habit Tracking (Reclaim-style)
+        
+        print("\n⚡ MEDIUM PRIORITY TESTS")
+        self.test_smart_home_control()    # MEDIUM - Smart Home (Alexa-style)
+        self.test_support_automation()    # MEDIUM - Support Automation (eesel AI-style)
+        self.test_integrations_manager()  # MEDIUM - Integrations Manager (100+ services)
+        
+        print("\n📋 BASIC FUNCTIONALITY TESTS")
         self.test_notes_crud()
         self.test_tasks_crud()
         self.test_calendar_events()
-        self.test_ai_features()
-        self.test_dashboard_stats()
-        self.test_search_functionality()
-        self.test_assistant_config()
         
         # Cleanup
         self.cleanup_resources()
         
         # Print summary
         print("\n" + "=" * 60)
-        print("📊 TEST SUMMARY")
+        print("📊 SUPER ASSISTANT TEST SUMMARY")
         print("=" * 60)
         print(f"Total tests run: {self.tests_run}")
         print(f"Tests passed: {self.tests_passed}")
         print(f"Tests failed: {self.tests_run - self.tests_passed}")
         print(f"Success rate: {(self.tests_passed / self.tests_run * 100):.1f}%" if self.tests_run > 0 else "0%")
         
-        # Print failed tests
+        # Print failed tests by priority
         failed_tests = [test for test in self.test_results if not test['success']]
         if failed_tests:
             print(f"\n❌ FAILED TESTS ({len(failed_tests)}):")
-            for test in failed_tests:
-                print(f"  • {test['name']}: {test['details']}")
+            
+            # Group by priority
+            critical_failures = [t for t in failed_tests if any(keyword in t['name'].lower() for keyword in ['authentication', 'super ai chat'])]
+            high_failures = [t for t in failed_tests if any(keyword in t['name'].lower() for keyword in ['dashboard', 'scheduling', 'habit'])]
+            medium_failures = [t for t in failed_tests if any(keyword in t['name'].lower() for keyword in ['smart home', 'support', 'integration'])]
+            other_failures = [t for t in failed_tests if t not in critical_failures + high_failures + medium_failures]
+            
+            if critical_failures:
+                print(f"\n🚨 CRITICAL FAILURES ({len(critical_failures)}):")
+                for test in critical_failures:
+                    print(f"  • {test['name']}: {test['details']}")
+            
+            if high_failures:
+                print(f"\n⚠️ HIGH PRIORITY FAILURES ({len(high_failures)}):")
+                for test in high_failures:
+                    print(f"  • {test['name']}: {test['details']}")
+            
+            if medium_failures:
+                print(f"\n📋 MEDIUM PRIORITY FAILURES ({len(medium_failures)}):")
+                for test in medium_failures:
+                    print(f"  • {test['name']}: {test['details']}")
+            
+            if other_failures:
+                print(f"\n📝 OTHER FAILURES ({len(other_failures)}):")
+                for test in other_failures:
+                    print(f"  • {test['name']}: {test['details']}")
         
         return self.tests_passed == self.tests_run
 
