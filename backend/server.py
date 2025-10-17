@@ -1226,6 +1226,25 @@ async def delete_project(project_id: str, current_user: dict = Depends(get_curre
     await db.projects.delete_one({"id": project_id, "user_id": current_user["id"]})
     return {"message": "Proyecto eliminado"}
 
+@api_router.get("/projects/{project_id}/download")
+async def download_project(project_id: str, current_user: dict = Depends(get_current_user)):
+    """Download a project file"""
+    from fastapi.responses import FileResponse
+    
+    project = await db.projects.find_one({"id": project_id, "user_id": current_user["id"]})
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    
+    file_path = Path(project["file_path"])
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado en el servidor")
+    
+    return FileResponse(
+        path=str(file_path),
+        filename=project["file_name"],
+        media_type="application/octet-stream"
+    )
+
 @api_router.post("/ai/analyze-document")
 async def analyze_document(
     file: UploadFile = File(...),
