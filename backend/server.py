@@ -1235,9 +1235,12 @@ async def analyze_document(
 ):
     """Analyze document with AI and optionally save to projects"""
     try:
+        print(f"Analyzing document: {file.filename}, action: {action}")
+        
         # Read file content
         content = await file.read()
         file_extension = Path(file.filename).suffix.lower()
+        print(f"File extension: {file_extension}, size: {len(content)} bytes")
         
         # Extract text based on file type
         extracted_text = ""
@@ -1253,8 +1256,10 @@ async def analyze_document(
                 pdf_reader = PyPDF2.PdfReader(pdf_file)
                 for page in pdf_reader.pages:
                     extracted_text += page.extract_text() + "\n"
+                print(f"PDF extracted text length: {len(extracted_text)}")
             except Exception as e:
-                extracted_text = f"[PDF contenido: {len(content)} bytes - requiere procesamiento]"
+                print(f"Error extracting PDF: {e}")
+                extracted_text = f"[PDF contenido: {len(content)} bytes - Error: {str(e)}]"
         elif file_extension in ['.docx', '.doc']:
             # Simple DOCX text extraction
             try:
@@ -1262,34 +1267,65 @@ async def analyze_document(
                 from io import BytesIO
                 doc = Document(BytesIO(content))
                 extracted_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+                print(f"DOCX extracted text length: {len(extracted_text)}")
             except Exception as e:
-                extracted_text = f"[DOCX contenido: {len(content)} bytes - requiere procesamiento]"
+                print(f"Error extracting DOCX: {e}")
+                extracted_text = f"[DOCX contenido: {len(content)} bytes - Error: {str(e)}]"
+        elif file_extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
+            # For images, just note that it's an image
+            extracted_text = f"[Imagen {file_extension}: {len(content)} bytes - Análisis visual en desarrollo]"
         else:
             extracted_text = f"[Archivo {file_extension}: {len(content)} bytes]"
         
         # Limit text for AI analysis
         text_for_analysis = extracted_text[:8000] if len(extracted_text) > 8000 else extracted_text
         
-        # Get AI analysis
-        ai_prompt = f"""Analiza este documento y proporciona:
+        if len(text_for_analysis) < 20:
+            # If we couldn't extract meaningful text, provide a basic analysis
+            ai_analysis = f"""
+**Resumen ejecutivo:**
+Archivo recibido: {file.filename} ({file_extension}, {len(content)} bytes).
+
+**Información:**
+- Tipo de archivo: {file_extension}
+- Tamaño: {len(content)} bytes
+- Estado: Archivo cargado exitosamente
+
+**Nota:** El contenido no pudo ser extraído automáticamente. El archivo ha sido guardado.
+"""
+        else:
+            # Get AI analysis
+            ai_prompt = f"""Analiza este documento en español y proporciona:
 1. **Resumen ejecutivo** (2-3 oraciones)
-2. **Puntos clave** (lista de 3-5 puntos)
-3. **Tareas detectadas** (si hay alguna acción mencionada)
-4. **Información importante** (fechas, nombres, cantidades)
+2. **Puntos clave** (lista de 3-5 puntos principales)
+3. **Tareas o acciones detectadas** (si hay alguna acción mencionada)
+4. **Información importante** (fechas, nombres, cantidades relevantes)
 
 Documento: {file.filename}
 Contenido:
 {text_for_analysis}
 """
-        
-        client = get_llm_client()
-        completion = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "user", "content": ai_prompt}],
-            temperature=0.3
-        )
-        
-        ai_analysis = completion.choices[0].message.content
+            
+            try:
+                client = get_llm_client()
+                completion = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[{"role": "user", "content": ai_prompt}],
+                    temperature=0.3
+                )
+                ai_analysis = completion.choices[0].message.content
+                print(f"AI analysis completed successfully")
+            except Exception as e:
+                print(f"Error getting AI analysis: {e}")
+                ai_analysis = f"""
+**Resumen ejecutivo:**
+Archivo procesado: {file.filename}
+
+**Contenido extraído:**
+{text_for_analysis[:500]}...
+
+**Nota:** Análisis IA temporalmente no disponible.
+"""
         
         result = {
             "filename": file.filename,
