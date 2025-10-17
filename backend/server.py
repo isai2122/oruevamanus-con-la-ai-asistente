@@ -1307,13 +1307,16 @@ Contenido:
 """
             
             try:
-                client = get_llm_client()
-                completion = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[{"role": "user", "content": ai_prompt}],
-                    temperature=0.3
-                )
-                ai_analysis = completion.choices[0].message.content
+                api_key = os.environ.get('EMERGENT_LLM_KEY')
+                chat = LlmChat(
+                    api_key=api_key,
+                    session_id=f"doc_analysis_{current_user['id']}",
+                    system_message="Eres un asistente experto en análisis de documentos. Proporciona análisis claros y concisos."
+                ).with_model("openai", "gpt-4o")
+                
+                user_message = UserMessage(text=ai_prompt)
+                response = await chat.send_message(user_message)
+                ai_analysis = response.text
                 print(f"AI analysis completed successfully")
             except Exception as e:
                 print(f"Error getting AI analysis: {e}")
