@@ -518,6 +518,24 @@ const AiChat = () => {
                       {message.content}
                     </div>
                     
+                    {/* Show attached files for user messages */}
+                    {message.files && message.files.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-white/20">
+                        <div className="flex flex-wrap gap-2">
+                          {message.files.map((file, i) => (
+                            <div key={i} className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg text-xs">
+                              {file.type.startsWith('image/') ? (
+                                <Image className="w-3 h-3" />
+                              ) : (
+                                <File className="w-3 h-3" />
+                              )}
+                              <span className="truncate max-w-24">{file.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     {message.autoCreated && (
                       <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
                         <div className="flex items-center gap-2 text-green-700 text-xs font-semibold">
