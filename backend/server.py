@@ -1226,6 +1226,117 @@ async def delete_project(project_id: str, current_user: dict = Depends(get_curre
     await db.projects.delete_one({"id": project_id, "user_id": current_user["id"]})
     return {"message": "Proyecto eliminado"}
 
+@api_router.post("/ai/analyze-document")
+async def analyze_document(
+    file: UploadFile = File(...),
+    action: str = Form("analyze"),  # "analyze", "save_to_projects", "both"
+    project_name: str = Form(None),
+    current_user: dict = Depends(get_current_user)
+):
+    """Analyze document with AI and optionally save to projects"""
+    try:
+        # Read file content
+        content = await file.read()
+        file_extension = Path(file.filename).suffix.lower()
+        
+        # Extract text based on file type
+        extracted_text = ""
+        
+        if file_extension == '.txt':
+            extracted_text = content.decode('utf-8', errors='ignore')
+        elif file_extension == '.pdf':
+            # Simple PDF text extraction
+            try:
+                import PyPDF2
+                from io import BytesIO
+                pdf_file = BytesIO(content)
+                pdf_reader = PyPDF2.PdfReader(pdf_file)
+                for page in pdf_reader.pages:
+                    extracted_text += page.extract_text() + "\n"
+            except Exception as e:
+                extracted_text = f"[PDF contenido: {len(content)} bytes - requiere procesamiento]"
+        elif file_extension in ['.docx', '.doc']:
+            # Simple DOCX text extraction
+            try:
+                from docx import Document
+                from io import BytesIO
+                doc = Document(BytesIO(content))
+                extracted_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+            except Exception as e:
+                extracted_text = f"[DOCX contenido: {len(content)} bytes - requiere procesamiento]"
+        else:
+            extracted_text = f"[Archivo {file_extension}: {len(content)} bytes]"
+        
+        # Limit text for AI analysis
+        text_for_analysis = extracted_text[:8000] if len(extracted_text) > 8000 else extracted_text
+        
+        # Get AI analysis
+        ai_prompt = f"""Analiza este documento y proporciona:
+1. **Resumen ejecutivo** (2-3 oraciones)
+2. **Puntos clave** (lista de 3-5 puntos)
+3. **Tareas detectadas** (si hay alguna acción mencionada)
+4. **Información importante** (fechas, nombres, cantidades)
+
+Documento: {file.filename}
+Contenido:
+{text_for_analysis}
+"""
+        
+        client = get_llm_client()
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": ai_prompt}],
+            temperature=0.3
+        )
+        
+        ai_analysis = completion.choices[0].message.content
+        
+        result = {
+            "filename": file.filename,
+            "file_type": file_extension,
+            "size": len(content),
+            "analysis": ai_analysis,
+            "extracted_text_length": len(extracted_text)
+        }
+        
+        # Save to projects if requested
+        if action in ["save_to_projects", "both"]:
+            # Create uploads directory if it doesn't exist
+            uploads_dir = Path("/app/uploads")
+            uploads_dir.mkdir(exist_ok=True)
+            
+            # Generate unique filename
+            unique_filename = f"{uuid.uuid4()}{file_extension}"
+            file_path = uploads_dir / unique_filename
+            
+            # Save file
+            with open(file_path, "wb") as f:
+                f.write(content)
+            
+            # Create project
+            project = Project(
+                user_id=current_user["id"],
+                name=project_name or file.filename,
+                description=f"Análisis IA: {ai_analysis[:200]}...",
+                file_name=file.filename,
+                file_path=str(file_path),
+                file_size=len(content),
+                file_type=file.content_type or "application/octet-stream",
+                ai_analysis={"summary": ai_analysis, "extracted_text": extracted_text[:1000]}
+            )
+            
+            project_dict = prepare_for_mongo(project.dict())
+            await db.projects.insert_one(project_dict)
+            
+            result["project"] = parse_from_mongo(project_dict)
+            result["saved_to_projects"] = True
+        
+        return result
+        
+    except Exception as e:
+        print(f"Error analyzing document: {e}")
+        raise HTTPException(status_code=500, detail=f"Error analizando documento: {str(e)}")
+
 # Dashboard Stats Endpoint
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
