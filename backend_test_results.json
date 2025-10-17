@@ -1,6 +1,6 @@
 {
   "timestamp": "2025-10-12T21:14:48.610614",
-  "backend_url": "https://command-hub-4.preview.emergentagent.com",
+  "backend_url": "https://asistente-definitivo.preview.emergentagent.com",
   "total_tests": 26,
   "passed_tests": 24,
   "failed_tests": 2,
