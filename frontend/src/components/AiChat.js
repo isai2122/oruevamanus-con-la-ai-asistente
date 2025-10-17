@@ -18,7 +18,13 @@ import {
   Zap,
   MessageCircle,
   Target,
-  PenTool
+  PenTool,
+  Paperclip,
+  Image,
+  Upload,
+  File,
+  X,
+  Camera
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
