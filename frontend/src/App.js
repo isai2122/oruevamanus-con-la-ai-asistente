@@ -114,11 +114,16 @@ function App() {
             {user ? (
               <Route path="/" element={<MainLayout />}>
                 <Route index element={<Dashboard />} />
+                <Route path="chat" element={<AiChat />} />
+                <Route path="smart-scheduling" element={<SmartScheduling />} />
+                <Route path="habits" element={<HabitTracker />} />
+                <Route path="smart-home" element={<SmartHome />} />
                 <Route path="notes" element={<NotesManager />} />
                 <Route path="tasks" element={<TasksManager />} />
                 <Route path="calendar" element={<CalendarView />} />
                 <Route path="projects" element={<ProjectsManager />} />
-                <Route path="chat" element={<AiChat />} />
+                <Route path="support" element={<SupportCenter />} />
+                <Route path="integrations" element={<IntegrationsHub />} />
                 <Route path="settings" element={<SettingsScreen />} />
               </Route>
             ) : (
