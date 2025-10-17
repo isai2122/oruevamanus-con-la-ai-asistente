@@ -34,7 +34,7 @@ const MainLayout = () => {
     { name: 'Chat IA', href: '/chat', icon: MessageCircle },
     { name: 'Programación IA', href: '/smart-scheduling', icon: Zap },
     { name: 'Hábitos', href: '/habits', icon: Flame },
-    { name: 'Hogar Inteligente', href: '/smart-home', icon: SmartHome },
+    { name: 'Hogar Inteligente', href: '/smart-home', icon: Home },
     { name: 'Notas', href: '/notes', icon: FileText },
     { name: 'Tareas', href: '/tasks', icon: CheckSquare },
     { name: 'Calendario', href: '/calendar', icon: Calendar },
