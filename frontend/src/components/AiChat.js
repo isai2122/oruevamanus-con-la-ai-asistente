@@ -122,9 +122,9 @@ const AiChat = () => {
     setConversationContext(newContext);
 
     try {
-      const response = await axios.post(`${API}/ai/chat`, {
-        text: fullMessage,
-        context: newContext.join('\n')
+      const response = await axios.post(`${API}/ai/super-chat`, {
+        message: fullMessage,
+        context: newContext
       });
 
       const aiMessage = {
@@ -134,7 +134,7 @@ const AiChat = () => {
         timestamp: new Date(),
         suggestions: response.data.suggestions || [],
         actions: response.data.actions || [],
-        autoCreated: response.data.response.includes('He creado automáticamente')
+        autoCreated: response.data.auto_created_tasks || response.data.response.includes('He creado automáticamente')
       };
 
       setMessages(prev => [...prev, aiMessage]);
