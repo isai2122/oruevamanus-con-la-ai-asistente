@@ -58,10 +58,11 @@ const NotesManager = () => {
       if (selectedTag && selectedTag !== 'all') params.append('tag', selectedTag);
       
       const response = await axios.get(`${API}/notes?${params}`);
-      setNotes(response.data);
+      setNotes(response.data.notes || []);
     } catch (error) {
       console.error('Error fetching notes:', error);
       toast.error('Error al cargar notas');
+      setNotes([]);
     } finally {
       setLoading(false);
     }
