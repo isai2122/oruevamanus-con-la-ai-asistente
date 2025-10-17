@@ -923,10 +923,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
-
 @api_router.get("/")
 async def root():
     return {"message": "🚀 Asistente-Definitivo SUPER API funcionando!", "version": "3.0.0"}
@@ -942,3 +938,7 @@ async def health_check():
             "support_automation", "100+_integrations", "ai_optimization"
         ]
     }
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
