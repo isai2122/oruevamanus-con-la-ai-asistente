@@ -112,6 +112,31 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Radix Dialog overrides */
+[data-radix-popper-content-wrapper] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Dialog content styling */
+.dialog-content {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Form input styling to ensure visibility */
+.modern-input {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid rgba(148, 163, 184, 0.3) !important;
+}
+
+.modern-input:focus {
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: rgb(99, 102, 241) !important;
+}
+
 /* Custom buttons */
 .btn-modern {
   @apply px-6 py-3 rounded-xl font-medium transition-all duration-200;
