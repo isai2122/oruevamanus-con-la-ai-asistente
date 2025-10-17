@@ -94,26 +94,36 @@ const AiChat = () => {
   }, [messages]);
 
   const sendMessage = async (message = inputMessage) => {
-    if (!message.trim() || isLoading) return;
+    if ((!message.trim() && uploadedFiles.length === 0) || isLoading) return;
+
+    // Analyze uploaded files first
+    let fileAnalysis = '';
+    if (uploadedFiles.length > 0) {
+      fileAnalysis = await analyzeUploadedFiles();
+    }
+
+    const fullMessage = fileAnalysis ? `${message}\n\n📎 Archivos analizados:\n${fileAnalysis}` : message;
 
     const userMessage = {
       id: Date.now(),
       type: 'user',
       content: message,
+      files: uploadedFiles.length > 0 ? uploadedFiles.map(f => ({name: f.name, type: f.type, size: f.size})) : undefined,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setUploadedFiles([]); // Clear uploaded files after sending
     setIsLoading(true);
 
     // Update conversation context
-    const newContext = [...conversationContext, message].slice(-10); // Keep last 10 messages
+    const newContext = [...conversationContext, fullMessage].slice(-10);
     setConversationContext(newContext);
 
     try {
       const response = await axios.post(`${API}/ai/chat`, {
-        text: message,
+        text: fullMessage,
         context: newContext.join('\n')
       });
 
