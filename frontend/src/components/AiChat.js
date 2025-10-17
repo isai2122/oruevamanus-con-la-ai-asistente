@@ -672,53 +672,132 @@ const AiChat = () => {
             </Button>
           </div>
           
-          <div className="flex gap-3 items-end">
-            <div className="flex-1">
-              <Textarea
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="💬 Escribe cualquier cosa... 'Tengo que hacer X', 'Recordar Y', '¿Cómo organizo Z?'\n\n🤖 Soy muy inteligente y entiendo contexto natural. ¡Pruébame!"
-                rows={3}
-                className="modern-input resize-none border-2 border-indigo-200 focus:border-indigo-400"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-                disabled={isLoading}
-                data-testid="chat-input"
-              />
+          {/* File Upload Area */}
+          {uploadedFiles.length > 0 && (
+            <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-indigo-800 flex items-center gap-1">
+                  <Paperclip className="w-4 h-4" />
+                  Archivos para análisis IA ({uploadedFiles.length})
+                </h4>
+              </div>
+              <div className="space-y-2">
+                {uploadedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between bg-white p-2 rounded-lg border border-indigo-200">
+                    <div className="flex items-center gap-2">
+                      {file.type.startsWith('image/') ? (
+                        <Image className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <File className="w-4 h-4 text-blue-600" />
+                      )}
+                      <span className="text-sm text-slate-700 truncate max-w-48">{file.name}</span>
+                      <span className="text-xs text-slate-500">({(file.size / 1024).toFixed(1)}KB)</span>
+                    </div>
+                    <Button
+                      onClick={() => removeFile(index)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-slate-500 hover:text-red-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
-            
-            <div className="flex flex-col gap-2">
-              <Button
-                onClick={handleVoiceInput}
-                disabled={isListening || isLoading}
-                variant="outline"
-                size="sm"
-                className={`h-12 w-12 p-0 ${isListening ? 'bg-red-50 border-red-200' : 'hover:bg-indigo-50'}`}
-                data-testid="voice-input-btn"
-              >
-                {isListening ? (
-                  <MicOff className="w-5 h-5 text-red-600 animate-pulse" />
-                ) : (
-                  <Mic className="w-5 h-5" />
-                )}
-              </Button>
+          )}
+
+          {/* Drop Zone */}
+          <div 
+            className={`relative ${isDragOver ? 'border-2 border-dashed border-indigo-400 bg-indigo-50 rounded-xl p-2' : ''}`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+          >
+            {isDragOver && (
+              <div className="absolute inset-0 flex items-center justify-center bg-indigo-50 border-2 border-dashed border-indigo-400 rounded-xl z-10">
+                <div className="text-center">
+                  <Upload className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
+                  <p className="text-indigo-700 font-semibold">Suelta los archivos aquí</p>
+                  <p className="text-indigo-600 text-sm">Imágenes, PDFs, documentos...</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3 items-end">
+              <div className="flex-1">
+                <Textarea
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder={uploadedFiles.length > 0 ? 
+                    "📎 Archivos listos para análisis... Escribe tu pregunta o deja vacío para análisis automático" :
+                    "💬 Escribe cualquier cosa... 'Tengo que hacer X', 'Recordar Y', '¿Cómo organizo Z?'\n\n📎 Arrastra archivos aquí o usa el botón de adjuntar\n🤖 Soy muy inteligente y entiendo contexto natural. ¡Pruébame!"
+                  }
+                  rows={3}
+                  className="modern-input resize-none border-2 border-indigo-200 focus:border-indigo-400"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  disabled={isLoading}
+                  data-testid="chat-input"
+                />
+              </div>
               
-              <Button
-                onClick={() => sendMessage()}
-                disabled={!inputMessage.trim() || isLoading}
-                className="h-12 w-12 p-0 btn-modern shadow-lg"
-                data-testid="send-message-btn"
-              >
-                {isLoading ? (
-                  <Loader className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Send className="w-5 h-5" />
-                )}
-              </Button>
+              <div className="flex flex-col gap-2">
+                {/* File Upload Button */}
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading}
+                  variant="outline"
+                  size="sm"
+                  className="h-12 w-12 p-0 hover:bg-indigo-50"
+                  data-testid="file-upload-btn"
+                  title="Subir archivo para análisis IA"
+                >
+                  <Paperclip className="w-5 h-5" />
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,text/*,.pdf,.doc,.docx"
+                  onChange={(e) => handleFileUpload(Array.from(e.target.files || []))}
+                  className="hidden"
+                />
+
+                <Button
+                  onClick={handleVoiceInput}
+                  disabled={isListening || isLoading}
+                  variant="outline"
+                  size="sm"
+                  className={`h-12 w-12 p-0 ${isListening ? 'bg-red-50 border-red-200' : 'hover:bg-indigo-50'}`}
+                  data-testid="voice-input-btn"
+                  title="Comando de voz"
+                >
+                  {isListening ? (
+                    <MicOff className="w-5 h-5 text-red-600 animate-pulse" />
+                  ) : (
+                    <Mic className="w-5 h-5" />
+                  )}
+                </Button>
+                
+                <Button
+                  onClick={() => sendMessage()}
+                  disabled={(!inputMessage.trim() && uploadedFiles.length === 0) || isLoading}
+                  className="h-12 w-12 p-0 btn-modern shadow-lg"
+                  data-testid="send-message-btn"
+                  title="Enviar mensaje"
+                >
+                  {isLoading ? (
+                    <Loader className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Send className="w-5 h-5" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
           
