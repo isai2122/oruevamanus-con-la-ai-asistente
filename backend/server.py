@@ -1419,6 +1419,84 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Assistant Configuration Endpoints
+@api_router.get("/assistant/config")
+async def get_assistant_config(current_user: dict = Depends(get_current_user)):
+    """Get assistant configuration for current user"""
+    try:
+        user = await db.users.find_one({"id": current_user["id"]})
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        assistant_config = user.get("assistant_config", {
+            "name": "Asistente-Definitivo",
+            "photo": "",
+            "tone": "energetico",
+            "specializations": ["productivity", "scheduling", "automation", "support"]
+        })
+        
+        return assistant_config
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.put("/assistant/config")
+async def update_assistant_config(config: dict, current_user: dict = Depends(get_current_user)):
+    """Update assistant configuration"""
+    try:
+        result = await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": {"assistant_config": config}}
+        )
+        
+        if result.modified_count == 0:
+            # Check if user exists
+            user = await db.users.find_one({"id": current_user["id"]})
+            if not user:
+                raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        return {"message": "Configuración actualizada", "config": config}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/user/preferences")
+async def get_user_preferences(current_user: dict = Depends(get_current_user)):
+    """Get user preferences"""
+    try:
+        user = await db.users.find_one({"id": current_user["id"]})
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        preferences = user.get("preferences", {
+            "theme": "light",
+            "language": "es",
+            "timezone": "America/Mexico_City",
+            "dateFormat": "dd/MM/yyyy",
+            "autoSave": True,
+            "offlineMode": True
+        })
+        
+        return preferences
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.put("/user/preferences")
+async def update_user_preferences(preferences: dict, current_user: dict = Depends(get_current_user)):
+    """Update user preferences"""
+    try:
+        result = await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": {"preferences": preferences}}
+        )
+        
+        if result.modified_count == 0:
+            user = await db.users.find_one({"id": current_user["id"]})
+            if not user:
+                raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        return {"message": "Preferencias actualizadas", "preferences": preferences}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include router and setup
 app.include_router(api_router)
 
