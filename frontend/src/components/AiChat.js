@@ -522,9 +522,23 @@ const AiChat = () => {
             {messages.map((message) => (
               <div key={message.id} className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {message.type === 'ai' && (
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <Brain className="w-6 h-6 text-white" />
-                  </div>
+                  <Avatar className="w-12 h-12 flex-shrink-0 shadow-lg">
+                    {assistantConfig.photo ? (
+                      <AvatarImage src={assistantConfig.photo} alt={assistantConfig.name || 'Asistente'} />
+                    ) : (
+                      <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-purple-600">
+                        <Brain className="w-6 h-6 text-white" />
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                )}
+                
+                {message.type === 'user' && (
+                  <Avatar className="w-12 h-12 flex-shrink-0 shadow-lg order-2">
+                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-cyan-500">
+                      <User className="w-6 h-6 text-white" />
+                    </AvatarFallback>
+                  </Avatar>
                 )}
                 
                 <div className={`max-w-[85%] ${message.type === 'user' ? 'order-1' : ''}`}>
