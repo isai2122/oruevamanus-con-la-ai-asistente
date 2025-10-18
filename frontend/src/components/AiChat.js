@@ -594,6 +594,11 @@ const AiChat = () => {
                   </div>
                   
                   <div className="flex items-center gap-2 mt-2 px-1">
+                    {message.type === 'ai' && (
+                      <span className="text-xs font-semibold text-indigo-600">
+                        {assistantConfig.name || 'Asistente-Definitivo'}
+                      </span>
+                    )}
                     <span className="text-xs text-slate-500">
                       {formatTimestamp(message.timestamp)}
                     </span>
