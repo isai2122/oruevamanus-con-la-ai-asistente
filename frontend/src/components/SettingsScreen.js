@@ -241,7 +241,7 @@ const SettingsScreen = () => {
                 <Input
                   id="assistant-name"
                   value={localAssistantConfig.name}
-                  onChange={(e) => setAssistantConfig({ ...assistantConfig, name: e.target.value })}
+                  onChange={(e) => setLocalAssistantConfig({ ...assistantConfig, name: e.target.value })}
                   placeholder="Nombre de tu asistente"
                   className="modern-input"
                   data-testid="assistant-name-input"
@@ -261,7 +261,7 @@ const SettingsScreen = () => {
                           ? 'border-indigo-500 bg-indigo-50'
                           : 'border-slate-200 hover:border-slate-300 bg-white'
                       }`}
-                      onClick={() => setAssistantConfig({ ...assistantConfig, tone: option.value })}
+                      onClick={() => setLocalAssistantConfig({ ...assistantConfig, tone: option.value })}
                       data-testid={`tone-${option.value}`}
                     >
                       <h4 className="font-medium text-slate-900 mb-1">{option.label}</h4>
