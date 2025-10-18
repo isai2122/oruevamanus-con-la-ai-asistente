@@ -1,0 +1,554 @@
+{
+  "timestamp": "2025-10-17T21:25:36.948024",
+  "backend_url": "https://asistente-definitivo.preview.emergentagent.com",
+  "total_tests": 25,
+  "passed_tests": 16,
+  "failed_tests": 9,
+  "success_rate": 64.0,
+  "test_details": [
+    {
+      "name": "API connectivity (via auth test)",
+      "success": true,
+      "details": "API is accessible and functional",
+      "response_data": {
+        "status": "API working"
+      }
+    },
+    {
+      "name": "User registration",
+      "success": true,
+      "details": "Status: 200",
+      "response_data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NjhhZDgxNy0yYjYwLTQ5NjUtOGQ0Zi1mYzJkODI3ODY4ZjYiLCJleHAiOjE3NjA3Nzk1MTd9.2uNJBYap6mFkU53HggOey6_nGZLa7jmkvfWwH5YiivA",
+        "token_type": "bearer",
+        "user": {
+          "id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+          "email": "test_user_1760736317@example.com",
+          "full_name": "Test User 1760736317",
+          "plan": "free",
+          "device_ids": [
+            "test_device_1760736317"
+          ],
+          "created_at": "2025-10-17T21:25:17.474398+00:00",
+          "preferences": {},
+          "assistant_config": {
+            "name": "Asistente-Definitivo",
+            "photo": "",
+            "tone": "energetico",
+            "specializations": [
+              "productivity",
+              "scheduling",
+              "automation",
+              "support"
+            ]
+          },
+          "integrations": {},
+          "habits": [],
+          "focus_time_preferences": {
+            "daily_focus_hours": 4,
+            "preferred_focus_blocks": [
+              "09:00-11:00",
+              "14:00-16:00"
+            ],
+            "auto_decline_meetings": true
+          }
+        }
+      }
+    },
+    {
+      "name": "User login",
+      "success": true,
+      "details": "Status: 200",
+      "response_data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NjhhZDgxNy0yYjYwLTQ5NjUtOGQ0Zi1mYzJkODI3ODY4ZjYiLCJleHAiOjE3NjA3Nzk1MTd9.2uNJBYap6mFkU53HggOey6_nGZLa7jmkvfWwH5YiivA",
+        "token_type": "bearer",
+        "user": {
+          "id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+          "email": "test_user_1760736317@example.com",
+          "full_name": "Test User 1760736317",
+          "plan": "free",
+          "device_ids": [
+            "test_device_1760736317"
+          ],
+          "created_at": "2025-10-17T21:25:17.474398+00:00",
+          "preferences": {},
+          "assistant_config": {
+            "name": "Asistente-Definitivo",
+            "photo": "",
+            "tone": "energetico",
+            "specializations": [
+              "productivity",
+              "scheduling",
+              "automation",
+              "support"
+            ]
+          },
+          "integrations": {},
+          "habits": [],
+          "focus_time_preferences": {
+            "daily_focus_hours": 4,
+            "preferred_focus_blocks": [
+              "09:00-11:00",
+              "14:00-16:00"
+            ],
+            "auto_decline_meetings": true
+          },
+          "password": "$2b$12$ffO/dzbqCHHdguHwBCpr0efRqPCR80iAyHFWV09OOTA2AdeCx/AaS"
+        }
+      }
+    },
+    {
+      "name": "Invalid login rejection",
+      "success": true,
+      "details": "Status: 401",
+      "response_data": {
+        "detail": "Credenciales inv\u00e1lidas"
+      }
+    },
+    {
+      "name": "SUPER AI Chat - Basic interaction",
+      "success": true,
+      "details": "Status: 200, Response length: 453",
+      "response_data": {
+        "response": "\u00a1Por supuesto! Vamos a hacer que este d\u00eda sea s\u00faper productivo. Primero, me gustar\u00eda saber si tienes alguna tarea pendiente o reuniones ya programadas para hoy. Con esa informaci\u00f3n, puedo ayudarte a organizar tu tiempo de manera eficiente, optimizando tus horas pico de productividad.\n\nAdem\u00e1s, para comenzar, te sugiero establecer un bloque de enfoque de 90 minutos, seguido de un breve descanso. \u00bfTe gustar\u00eda que creara estos bloques de tiempo para ti?",
+        "suggestions": [
+          "\ud83c\udfaf \u00bfOptimizo tu agenda para m\u00e1xima productividad?",
+          "\u26a1 \u00bfCreo automatizaciones personalizadas?",
+          "\ud83c\udfe0 \u00bfConfiguro tu hogar inteligente?",
+          "\ud83d\udcca \u00bfAnalizo tus patrones de trabajo?",
+          "\ud83e\udd1d \u00bfIntegro m\u00e1s herramientas a tu flujo?",
+          "\ud83d\udca1 \u00bfSugiero mejoras basadas en tus h\u00e1bitos?"
+        ],
+        "actions": [
+          {
+            "type": "support_automation",
+            "action": "ticket_analysis_complete"
+          }
+        ],
+        "created_items": [],
+        "ai_confidence": 0.95
+      }
+    },
+    {
+      "name": "SUPER AI Chat - Automatic task detection",
+      "success": true,
+      "details": "Status: 200, Auto tasks detected: True",
+      "response_data": {
+        "response": "\u00a1Entendido! Vamos a organizarte:\n\n1. **Comprar leche**: \u00bfA qu\u00e9 hora prefieres hacerlo ma\u00f1ana? Puedo crear un recordatorio para ti.\n\n2. **Llamar al dentista**: \u00bfTienes alguna hora espec\u00edfica en mente para la llamada? Tambi\u00e9n puedo programar un recordatorio para ello.\n\n\u00a1Vamos a optimizar tu d\u00eda! \ud83d\ude80\n\n\ud83d\ude80 **Acciones Autom\u00e1ticas Ejecutadas:**\n\u2705 Tarea creada: Comprar leche\n\u2705 Tarea creada: Llamar al dentista\n",
+        "suggestions": [
+          "\ud83c\udfaf \u00bfOptimizo tu agenda para m\u00e1xima productividad?",
+          "\u26a1 \u00bfCreo automatizaciones personalizadas?",
+          "\ud83c\udfe0 \u00bfConfiguro tu hogar inteligente?",
+          "\ud83d\udcca \u00bfAnalizo tus patrones de trabajo?",
+          "\ud83e\udd1d \u00bfIntegro m\u00e1s herramientas a tu flujo?",
+          "\ud83d\udca1 \u00bfSugiero mejoras basadas en tus h\u00e1bitos?"
+        ],
+        "actions": [
+          {
+            "type": "auto_tasks_detected",
+            "count": 2,
+            "tasks": [
+              {
+                "title": "Comprar leche",
+                "description": "Comprar leche ma\u00f1ana."
+              },
+              {
+                "title": "Llamar al dentista",
+                "description": "Llamar al dentista para agendar una cita."
+              }
+            ],
+            "auto_scheduled": true
+          },
+          {
+            "type": "smart_scheduling",
+            "action": "calendar_optimization_suggested"
+          }
+        ],
+        "created_items": [
+          {
+            "type": "task",
+            "item": {
+              "id": "df3f5b36-cab2-4a18-b622-3d988709b1cc",
+              "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+              "title": "Comprar leche",
+              "description": "Comprar leche ma\u00f1ana.",
+              "completed": false,
+              "priority": "medium",
+              "due_date": null,
+              "category": "ai-super",
+              "subtasks": [],
+              "created_date": "2025-10-17T21:25:26.103254+00:00",
+              "completed_date": null,
+              "estimated_time": null,
+              "actual_time": null,
+              "auto_scheduled": true,
+              "ai_suggestions": [],
+              "focus_session": null
+            }
+          },
+          {
+            "type": "task",
+            "item": {
+              "id": "3e0d4b55-4767-4a78-8399-8955eedc65f6",
+              "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+              "title": "Llamar al dentista",
+              "description": "Llamar al dentista para agendar una cita.",
+              "completed": false,
+              "priority": "medium",
+              "due_date": null,
+              "category": "ai-super",
+              "subtasks": [],
+              "created_date": "2025-10-17T21:25:26.117480+00:00",
+              "completed_date": null,
+              "estimated_time": null,
+              "actual_time": null,
+              "auto_scheduled": true,
+              "ai_suggestions": [],
+              "focus_session": null
+            }
+          }
+        ],
+        "ai_confidence": 0.95
+      }
+    },
+    {
+      "name": "SUPER AI Chat - Smart scheduling detection",
+      "success": true,
+      "details": "Status: 200, Scheduling detected: True",
+      "response_data": {
+        "response": "\u00a1Perfecto! Vamos a asegurar esa reuni\u00f3n para ti. \u00bfA qu\u00e9 hora te gustar\u00eda que fuera el viernes? Adem\u00e1s, si me dices cu\u00e1ntas personas asistir\u00e1n, puedo ayudarte a encontrar el mejor momento en el calendario de cada uno.\n\n\ud83d\ude80 **Acciones Autom\u00e1ticas Ejecutadas:**\n\u2705 Tarea creada: Agendar reuni\u00f3n con el equipo\n",
+        "suggestions": [
+          "\ud83c\udfaf \u00bfOptimizo tu agenda para m\u00e1xima productividad?",
+          "\u26a1 \u00bfCreo automatizaciones personalizadas?",
+          "\ud83c\udfe0 \u00bfConfiguro tu hogar inteligente?",
+          "\ud83d\udcca \u00bfAnalizo tus patrones de trabajo?",
+          "\ud83e\udd1d \u00bfIntegro m\u00e1s herramientas a tu flujo?",
+          "\ud83d\udca1 \u00bfSugiero mejoras basadas en tus h\u00e1bitos?"
+        ],
+        "actions": [
+          {
+            "type": "auto_tasks_detected",
+            "count": 1,
+            "tasks": [
+              {
+                "title": "Agendar reuni\u00f3n con el equipo",
+                "description": "Agendar una reuni\u00f3n el viernes para revisar el proyecto con el equipo."
+              }
+            ],
+            "auto_scheduled": true
+          },
+          {
+            "type": "smart_scheduling",
+            "action": "calendar_optimization_suggested"
+          }
+        ],
+        "created_items": [
+          {
+            "type": "task",
+            "item": {
+              "id": "dd508f17-afb0-4da8-93b0-0fc53eef088b",
+              "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+              "title": "Agendar reuni\u00f3n con el equipo",
+              "description": "Agendar una reuni\u00f3n el viernes para revisar el proyecto con el equipo.",
+              "completed": false,
+              "priority": "medium",
+              "due_date": null,
+              "category": "ai-super",
+              "subtasks": [],
+              "created_date": "2025-10-17T21:25:29.177436+00:00",
+              "completed_date": null,
+              "estimated_time": null,
+              "actual_time": null,
+              "auto_scheduled": true,
+              "ai_suggestions": [],
+              "focus_session": null
+            }
+          }
+        ],
+        "ai_confidence": 0.95
+      }
+    },
+    {
+      "name": "SUPER Dashboard - Advanced metrics",
+      "success": true,
+      "details": "Status: 200, Metrics: True, AI Insights: True, Quick Actions: True",
+      "response_data": {
+        "super_metrics": {
+          "productivity_score": 0.0,
+          "tasks_completed": 0,
+          "total_tasks": 3,
+          "active_habits": 0,
+          "connected_devices": 0,
+          "active_integrations": 0,
+          "notes_count": 0,
+          "events_count": 0
+        },
+        "ai_insights": [
+          "Tu productividad est\u00e1 al 0.0%",
+          "Tienes 0 h\u00e1bitos activos",
+          "Conectado a 0 servicios",
+          "IA optimizando autom\u00e1ticamente tu agenda"
+        ],
+        "quick_actions": [
+          "Optimizar agenda de hoy",
+          "Revisar h\u00e1bitos",
+          "Controlar dispositivos",
+          "Analizar productividad"
+        ]
+      }
+    },
+    {
+      "name": "Smart Scheduling - AI optimization",
+      "success": true,
+      "details": "Status: 200, Optimization: True, Tips: 3",
+      "response_data": {
+        "message": "Horario optimizado con IA",
+        "schedule": {
+          "id": "03a22da8-dedf-4722-b50f-59c3b7922718",
+          "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+          "date": "2024-12-20",
+          "schedule_type": "daily",
+          "ai_optimized": true,
+          "focus_blocks": [],
+          "meeting_blocks": [],
+          "task_blocks": [],
+          "habit_blocks": [],
+          "optimization_score": 0.95,
+          "created_date": "2025-10-17T21:25:29.297154+00:00"
+        },
+        "optimization_tips": [
+          "Bloques de enfoque programados autom\u00e1ticamente",
+          "Tareas organizadas por prioridad y energ\u00eda",
+          "Tiempo buffer agregado entre reuniones"
+        ]
+      }
+    },
+    {
+      "name": "Habit Tracking - Create habit with auto-scheduling",
+      "success": true,
+      "details": "Status: 200",
+      "response_data": {
+        "message": "H\u00e1bito creado con programaci\u00f3n IA",
+        "habit": {
+          "id": "ad639928-2c97-451b-b87e-409381b023ce",
+          "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+          "name": "Ejercicio matutino",
+          "description": "30 minutos de ejercicio cada ma\u00f1ana",
+          "frequency": "daily",
+          "duration_minutes": 30,
+          "preferred_times": [],
+          "streak": 0,
+          "ai_suggestions": [],
+          "auto_schedule": true,
+          "created_date": "2025-10-17T21:25:29.361496+00:00",
+          "last_completed": null
+        }
+      }
+    },
+    {
+      "name": "Habit Tracking - Get habits list",
+      "success": true,
+      "details": "Status: 200, Habits count: 1",
+      "response_data": {
+        "habits": [
+          {
+            "id": "ad639928-2c97-451b-b87e-409381b023ce",
+            "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+            "name": "Ejercicio matutino",
+            "description": "30 minutos de ejercicio cada ma\u00f1ana",
+            "frequency": "daily",
+            "duration_minutes": 30,
+            "preferred_times": [],
+            "streak": 0,
+            "ai_suggestions": [],
+            "auto_schedule": true,
+            "created_date": "2025-10-17T21:25:29.361496+00:00",
+            "last_completed": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "Smart Home - Add device",
+      "success": true,
+      "details": "Status: 200",
+      "response_data": {
+        "message": "Dispositivo inteligente agregado",
+        "device": {
+          "id": "82058b1b-2e6c-4ba2-9afb-92be69134f6e",
+          "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+          "device_name": "Luz Sala Principal",
+          "device_type": "light",
+          "room": "sala",
+          "brand": "philips_hue",
+          "device_id": "hue_light_001",
+          "is_online": true,
+          "last_command": null,
+          "automation_rules": [],
+          "created_date": "2025-10-17T21:25:29.515858+00:00"
+        }
+      }
+    },
+    {
+      "name": "Smart Home - Control device",
+      "success": true,
+      "details": "Status: 200",
+      "response_data": {
+        "message": "Comando 'encender luz al 80%' ejecutado",
+        "status": "success"
+      }
+    },
+    {
+      "name": "Support Automation - AI ticket analysis",
+      "success": true,
+      "details": "Status: 200, AI Analysis: True, Auto Response: True",
+      "response_data": {
+        "message": "Ticket analizado por IA",
+        "ticket": {
+          "id": "a7307e90-0b3f-4820-91cf-1b40a071e378",
+          "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+          "title": "Problema con sincronizaci\u00f3n de calendario",
+          "description": "Mi calendario no se est\u00e1 sincronizando correctamente con Google Calendar. Los eventos nuevos no aparecen y hay duplicados.",
+          "priority": "medium",
+          "status": "open",
+          "category": "integration",
+          "ai_analysis": {
+            "analysis": "Categor\u00eda: Aplicaciones/Cuentas en la nube\n\nPrioridad: Alta\n\nRespuesta sugerida: \nEstimado usuario, gracias por ponerse en contacto con el soporte t\u00e9cnico. Lamentamos los inconvenientes que est\u00e1 experimentando con la sincronizaci\u00f3n de su calendario. Vamos a guiarlo a trav\u00e9s de algunos pasos para resolver este problema y restaurar la funcionalidad completa.\n\nPasos de resoluci\u00f3n:\n1. Verifique la conexi\u00f3n a Internet: Aseg\u00farese de que su dispositivo est\u00e9 conectado a una red estable. Una conexi\u00f3n inestable puede afectar la sincronizaci\u00f3n.\n\n2. Configure la sincronizaci\u00f3n autom\u00e1tica:\n   - En su aplicaci\u00f3n de calendario, vaya a \"Configuraci\u00f3n\".\n   - Aseg\u00farese de que la opci\u00f3n de sincronizaci\u00f3n est\u00e9 activada.\n   \n3. Elimine y vuelva a agregar la cuenta de Google:\n   - Vaya a la configuraci\u00f3n de cuentas en su dispositivo.\n   - Elimine su cuenta de Google Calendar.\n   - Reinicie su dispositivo.\n   - Vuelva a agregar su cuenta de Google y permita que el dispositivo sincronice los eventos.\n\n4. Verifique los permisos de la aplicaci\u00f3n:\n   - Aseg\u00farese de que la aplicaci\u00f3n de calendario tenga los permisos necesarios para acceder a Internet y a su cuenta de Google.\n\n5. Limpiar cach\u00e9 y datos de la aplicaci\u00f3n:\n   - Vaya a la configuraci\u00f3n de aplicaciones en su dispositivo.\n   - Seleccione la aplicaci\u00f3n de calendario.\n   - Elija la opci\u00f3n de limpiar el cach\u00e9 y, si es necesario, los datos (esto podr\u00eda borrar las configuraciones personalizadas).\n\n6. Revise eventos duplicados:\n   - Si sigue viendo eventos duplicados, verifique si hay alguna suscripci\u00f3n a otros calendarios que pudiera estar creando duplicados.\n   - Ajuste las configuraciones de visualizaci\u00f3n para ver solo los calendarios deseados.\n\n7. Actualice la aplicaci\u00f3n:\n   - Aseg\u00farese de que la aplicaci\u00f3n de calendario est\u00e9 actualizada a la \u00faltima versi\u00f3n disponible en la tienda de aplicaciones.\n\nSi sigue experimentando problemas despu\u00e9s de intentar estos pasos, por favor h\u00e1ganoslo saber y con gusto lo asistiremos m\u00e1s detalladamente.",
+            "suggested_response": "Hemos recibido tu solicitud y estamos trabajando en una soluci\u00f3n.",
+            "priority": "medium",
+            "category": "general"
+          },
+          "auto_responses": [],
+          "resolution_suggestions": [],
+          "assigned_agent": null,
+          "created_date": "2025-10-17T21:25:36.457757+00:00",
+          "resolved_date": null
+        },
+        "auto_response": "Hemos recibido tu solicitud y estamos trabajando en una soluci\u00f3n."
+      }
+    },
+    {
+      "name": "Integrations Manager - Add integration",
+      "success": true,
+      "details": "Status: 200",
+      "response_data": {
+        "message": "Integraci\u00f3n con google_calendar configurada",
+        "integration": {
+          "id": "e523171f-18dc-445f-820a-bb8662f6dd36",
+          "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+          "service_name": "google_calendar",
+          "service_type": "calendar",
+          "credentials": {
+            "api_key": "test_api_key_123",
+            "refresh_token": "test_refresh_token"
+          },
+          "settings": {
+            "sync_frequency": "real_time",
+            "auto_create_events": true
+          },
+          "is_active": true,
+          "last_sync": null,
+          "created_date": "2025-10-17T21:25:36.542570+00:00"
+        }
+      }
+    },
+    {
+      "name": "Integrations Manager - Get integrations",
+      "success": true,
+      "details": "Status: 200, Integrations count: 1",
+      "response_data": {
+        "integrations": [
+          {
+            "id": "e523171f-18dc-445f-820a-bb8662f6dd36",
+            "user_id": "468ad817-2b60-4965-8d4f-fc2d827868f6",
+            "service_name": "google_calendar",
+            "service_type": "calendar",
+            "credentials": {
+              "api_key": "test_api_key_123",
+              "refresh_token": "test_refresh_token"
+            },
+            "settings": {
+              "sync_frequency": "real_time",
+              "auto_create_events": true
+            },
+            "is_active": true,
+            "last_sync": null,
+            "created_date": "2025-10-17T21:25:36.542570+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Create note with AI analysis",
+      "success": false,
+      "details": "Status: 404",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    },
+    {
+      "name": "Get all notes",
+      "success": false,
+      "details": "Status: 404, Count: 0",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    },
+    {
+      "name": "Search notes",
+      "success": false,
+      "details": "Status: 404, Results: 0",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    },
+    {
+      "name": "Create task",
+      "success": false,
+      "details": "Status: 404",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    },
+    {
+      "name": "Get all tasks",
+      "success": false,
+      "details": "Status: 404, Count: 0",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    },
+    {
+      "name": "Filter tasks by priority",
+      "success": false,
+      "details": "Status: 404, High priority tasks: 0",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    },
+    {
+      "name": "Create calendar event",
+      "success": false,
+      "details": "Status: 404",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    },
+    {
+      "name": "Get all events",
+      "success": false,
+      "details": "Status: 404, Count: 0",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    },
+    {
+      "name": "Get events by date range",
+      "success": false,
+      "details": "Status: 404, Events in range: 0",
+      "response_data": {
+        "detail": "Not Found"
+      }
+    }
+  ]
+}
