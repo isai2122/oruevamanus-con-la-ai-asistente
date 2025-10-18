@@ -20,6 +20,7 @@ import HabitTracker from './components/HabitTracker';
 import SmartHome from './components/SmartHome';
 import SupportCenter from './components/SupportCenter';
 import IntegrationsHub from './components/IntegrationsHub';
+import UpgradeScreen from './components/UpgradeScreen';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
