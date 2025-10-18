@@ -124,6 +124,7 @@ function App() {
                   <Route path="calendar" element={<CalendarView />} />
                   <Route path="projects" element={<ProjectsManager />} />
                   <Route path="support" element={<SupportCenter />} />
+                  <Route path="upgrade" element={<UpgradeScreen />} />
                   <Route path="settings" element={<SettingsScreen />} />
                 </Route>
               ) : (
