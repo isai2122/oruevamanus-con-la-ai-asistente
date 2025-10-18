@@ -32,6 +32,93 @@ body {
   --color-accent: #8b5cf6;
 }
 
+/* Apply theme colors globally */
+.modern-card {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+  transition: all 0.3s ease;
+}
+
+.btn-modern {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+  transition: all 0.3s ease;
+}
+
+.btn-modern:hover {
+  background-color: var(--color-secondary) !important;
+}
+
+.btn-secondary {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.text-primary {
+  color: var(--color-primary) !important;
+}
+
+.text-secondary {
+  color: var(--color-text-secondary) !important;
+}
+
+.bg-surface {
+  background-color: var(--color-surface) !important;
+}
+
+.border-color {
+  border-color: var(--color-border) !important;
+}
+
+/* Override default slate colors with theme colors */
+.text-slate-900 {
+  color: var(--color-text) !important;
+}
+
+.text-slate-600,
+.text-slate-700 {
+  color: var(--color-text-secondary) !important;
+}
+
+.bg-slate-50 {
+  background-color: var(--color-surface) !important;
+}
+
+.border-slate-200,
+.border-slate-300 {
+  border-color: var(--color-border) !important;
+}
+
+/* Forms - more opaque backgrounds */
+input,
+textarea,
+select,
+.select-trigger {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-secondary) !important;
+  opacity: 0.6;
+}
+
+/* Dialogs and modals */
+[role="dialog"],
+.dialog-content {
+  background-color: var(--color-background) !important;
+  color: var(--color-text) !important;
+}
+
+/* Cards */
+.card {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+}
 /* Headings use Space Grotesk */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Space Grotesk', sans-serif;
