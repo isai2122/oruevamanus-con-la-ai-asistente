@@ -1669,6 +1669,126 @@ async def update_user_preferences(preferences: dict, current_user: dict = Depend
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# =====================================================
+# PLAN & PAYMENT ENDPOINTS
+# =====================================================
+@api_router.get("/plans")
+async def get_plans():
+    """Get available plans information"""
+    return {
+        "plans": [
+            {
+                "id": "free",
+                "name": "Plan Gratuito",
+                "price": 0,
+                "currency": "COP",
+                "limits": PLAN_LIMITS["free"],
+                "features": [
+                    "✅ 10 Proyectos",
+                    "✅ 1 Análisis IA por día",
+                    "✅ 1 Subida automática al chat por día",
+                    "✅ 50 Notas",
+                    "✅ 100 Tareas",
+                    "✅ 5 Hábitos",
+                    "✅ Chat IA con GPT-4o",
+                    "❌ Smart Scheduling",
+                    "❌ Análisis ilimitados",
+                    "❌ Soporte prioritario"
+                ]
+            },
+            {
+                "id": "premium",
+                "name": "Plan Premium",
+                "price_cop": NEQUI_PAYMENT_INFO["monthly_price_cop"],
+                "price_usd": NEQUI_PAYMENT_INFO["monthly_price_usd"],
+                "currency": "COP/USD",
+                "limits": PLAN_LIMITS["premium"],
+                "features": [
+                    "✅ Proyectos ILIMITADOS",
+                    "✅ Análisis IA ILIMITADOS",
+                    "✅ Subidas automáticas ILIMITADAS",
+                    "✅ Notas ILIMITADAS",
+                    "✅ Tareas ILIMITADAS",
+                    "✅ Hábitos ILIMITADOS",
+                    "✅ Chat IA con GPT-4o",
+                    "✅ Smart Scheduling avanzado",
+                    "✅ Automatizaciones avanzadas",
+                    "✅ Soporte prioritario",
+                    "✅ Sin anuncios",
+                    "✅ Todas las funciones SUPER"
+                ]
+            }
+        ]
+    }
+
+@api_router.get("/user/plan")
+async def get_user_plan(current_user: dict = Depends(get_current_user)):
+    """Get current user's plan information"""
+    user = await db.users.find_one({"id": current_user["id"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    plan = user.get("plan", "free")
+    daily_usage = user.get("daily_usage", {})
+    
+    # Contar proyectos
+    project_count = await db.projects.count_documents({"user_id": current_user["id"]})
+    
+    return {
+        "current_plan": plan,
+        "limits": PLAN_LIMITS[plan],
+        "usage": {
+            "projects": project_count,
+            "ai_analysis_today": daily_usage.get("ai_analysis_count", 0),
+            "chat_uploads_today": daily_usage.get("chat_uploads_count", 0)
+        },
+        "premium_expires_at": user.get("premium_expires_at")
+    }
+
+@api_router.get("/payment/instructions")
+async def get_payment_instructions():
+    """Get Nequi payment instructions"""
+    return {
+        "method": "Nequi",
+        "phone": NEQUI_PAYMENT_INFO["phone"],
+        "name": NEQUI_PAYMENT_INFO["name"],
+        "price_cop": NEQUI_PAYMENT_INFO["monthly_price_cop"],
+        "price_usd": NEQUI_PAYMENT_INFO["monthly_price_usd"],
+        "currency": "COP/USD",
+        "instructions": [
+            f"1. Abre tu app Nequi",
+            f"2. Selecciona 'Enviar Dinero'",
+            f"3. Envía ${NEQUI_PAYMENT_INFO['monthly_price_cop']:,} COP (o ${NEQUI_PAYMENT_INFO['monthly_price_usd']} USD) al número {NEQUI_PAYMENT_INFO['phone']}",
+            f"4. En el mensaje incluye tu email: {'{tu_email}'}",
+            f"5. Envía captura de pantalla del pago a ortizisacc18@gmail.com",
+            f"6. Tu cuenta será activada en menos de 24 horas"
+        ],
+        "note": "Una vez confirmado el pago, tu cuenta será actualizada a Premium automáticamente."
+    }
+
+@api_router.post("/payment/notify")
+async def notify_payment(payment_data: dict, current_user: dict = Depends(get_current_user)):
+    """Notify that payment has been made (for manual verification)"""
+    # Guardar notificación de pago en base de datos para verificación manual
+    payment_notification = {
+        "user_id": current_user["id"],
+        "user_email": current_user["email"],
+        "amount": payment_data.get("amount"),
+        "currency": payment_data.get("currency", "COP"),
+        "screenshot_url": payment_data.get("screenshot_url"),
+        "notes": payment_data.get("notes", ""),
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.payment_notifications.insert_one(payment_notification)
+    
+    return {
+        "message": "Notificación de pago recibida. Tu cuenta será actualizada a Premium una vez verificado el pago (máximo 24 horas).",
+        "status": "pending"
+    }
+# =====================================================
+
 # Include router and setup
 app.include_router(api_router)
 
