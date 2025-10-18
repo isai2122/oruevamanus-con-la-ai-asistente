@@ -553,6 +553,21 @@ const SettingsScreen = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                
+                <div className="pt-4">
+                  <Button 
+                    onClick={savePreferences} 
+                    disabled={loading}
+                    className="w-full btn-modern"
+                  >
+                    {loading ? 'Guardando...' : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Guardar Preferencias
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
