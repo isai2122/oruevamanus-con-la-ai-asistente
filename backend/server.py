@@ -1308,6 +1308,16 @@ async def upload_project(
 ):
     """Upload a project file"""
     try:
+        # Verificar límite de proyectos
+        if not await check_plan_limit(current_user["id"], "projects"):
+            user = await db.users.find_one({"id": current_user["id"]})
+            plan = user.get("plan", "free")
+            limit = PLAN_LIMITS[plan]["max_projects"]
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Límite de {limit} proyectos alcanzado. Actualiza a Premium para proyectos ilimitados."
+            )
+        
         # Create uploads directory if it doesn't exist
         uploads_dir = Path("/app/uploads")
         uploads_dir.mkdir(exist_ok=True)
