@@ -717,9 +717,14 @@ async def register(user_data: UserCreate):
         raise HTTPException(status_code=400, detail="Email ya registrado")
     
     hashed_password = hash_password(user_data.password)
+    
+    # Verificar si es la cuenta premium automática
+    is_premium_account = user_data.email.lower() == PREMIUM_ACCOUNT_EMAIL.lower()
+    
     user = User(
         email=user_data.email,
         full_name=user_data.full_name,
+        plan="premium" if is_premium_account else "free",
         device_ids=[user_data.device_id] if user_data.device_id else []
     )
     user_dict = prepare_for_mongo(user.dict())
@@ -740,6 +745,15 @@ async def login(user_data: UserLogin):
     user = await db.users.find_one({"email": user_data.email})
     if not user or not verify_password(user_data.password, user.get("password", "")):
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    
+    # Asegurar que la cuenta premium automática siempre tenga premium
+    if user.get("email", "").lower() == PREMIUM_ACCOUNT_EMAIL.lower():
+        if user.get("plan") != "premium":
+            await db.users.update_one(
+                {"id": user["id"]},
+                {"$set": {"plan": "premium"}}
+            )
+            user["plan"] = "premium"
     
     if user_data.device_id and user_data.device_id not in user.get("device_ids", []):
         if len(user.get("device_ids", [])) >= MAX_ACCOUNTS_PER_USER:
