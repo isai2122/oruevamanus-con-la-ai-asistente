@@ -180,9 +180,15 @@ class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: EmailStr
     full_name: str
-    plan: str = "free"
+    plan: str = "free"  # "free" o "premium"
     device_ids: List[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    premium_expires_at: Optional[datetime] = None
+    daily_usage: Dict[str, Any] = Field(default_factory=lambda: {
+        "date": datetime.now(timezone.utc).date().isoformat(),
+        "ai_analysis_count": 0,
+        "chat_uploads_count": 0
+    })
     preferences: Dict[str, Any] = Field(default_factory=dict)
     assistant_config: Dict[str, Any] = Field(default_factory=lambda: {
         "name": "Asistente-Definitivo",
