@@ -446,32 +446,35 @@ const SettingsScreen = () => {
                   Apariencia
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Tema</Label>
-                  <Select 
-                    value={preferences.theme} 
-                    onValueChange={(value) => setPreferences({ ...preferences, theme: value })}
-                  >
-                    <SelectTrigger data-testid="theme-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">
-                        <div className="flex items-center gap-2">
-                          <Sun className="w-4 h-4" />
-                          Claro
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>Paleta de Colores</Label>
+                  <p className="text-xs text-slate-600 mb-3">Elige la combinación de colores para toda la aplicación</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {Object.entries(COLOR_PALETTES).map(([key, palette]) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          changePalette(key);
+                          setPreferences({ ...preferences, colorPalette: key });
+                        }}
+                        className={`p-4 rounded-lg border-2 transition-all hover:scale-105 ${
+                          currentPalette === key 
+                            ? 'border-indigo-500 ring-2 ring-indigo-200' 
+                            : 'border-slate-200'
+                        }`}
+                      >
+                        <div className="space-y-2">
+                          <div className="flex gap-1 h-8">
+                            <div className="flex-1 rounded" style={{ backgroundColor: palette.primary }}></div>
+                            <div className="flex-1 rounded" style={{ backgroundColor: palette.secondary }}></div>
+                            <div className="flex-1 rounded" style={{ backgroundColor: palette.accent }}></div>
+                          </div>
+                          <p className="text-xs font-medium text-center">{palette.name}</p>
                         </div>
-                      </SelectItem>
-                      <SelectItem value="dark">
-                        <div className="flex items-center gap-2">
-                          <Moon className="w-4 h-4" />
-                          Oscuro
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="auto">Automático</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
