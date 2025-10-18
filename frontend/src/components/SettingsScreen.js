@@ -70,7 +70,8 @@ const SettingsScreen = () => {
   const fetchAssistantConfig = async () => {
     try {
       const response = await axios.get(`${API}/assistant/config`);
-      setAssistantConfig(response.data);
+      setLocalAssistantConfig(response.data);
+      updateAssistantConfig(response.data); // Actualizar en contexto también
     } catch (error) {
       console.error('Error fetching assistant config:', error);
     }
@@ -80,6 +81,10 @@ const SettingsScreen = () => {
     try {
       const response = await axios.get(`${API}/user/preferences`);
       setPreferences(response.data);
+      // Si tiene tema guardado, aplicarlo
+      if (response.data.colorPalette) {
+        changePalette(response.data.colorPalette);
+      }
     } catch (error) {
       console.error('Error fetching preferences:', error);
     }
@@ -88,7 +93,8 @@ const SettingsScreen = () => {
   const saveAssistantConfig = async () => {
     setLoading(true);
     try {
-      await axios.put(`${API}/assistant/config`, assistantConfig);
+      await axios.put(`${API}/assistant/config`, localAssistantConfig);
+      updateAssistantConfig(localAssistantConfig); // Actualizar contexto
       toast.success('Configuración del asistente actualizada');
     } catch (error) {
       console.error('Error saving assistant config:', error);
@@ -101,7 +107,11 @@ const SettingsScreen = () => {
   const savePreferences = async () => {
     setLoading(true);
     try {
-      await axios.put(`${API}/user/preferences`, preferences);
+      const prefsWithPalette = {
+        ...preferences,
+        colorPalette: currentPalette
+      };
+      await axios.put(`${API}/user/preferences`, prefsWithPalette);
       toast.success('Preferencias guardadas');
     } catch (error) {
       console.error('Error saving preferences:', error);
