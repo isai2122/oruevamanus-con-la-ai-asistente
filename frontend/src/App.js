@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import '@/App.css';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Import components
 import AuthScreen from './components/AuthScreen';
