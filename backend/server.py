@@ -164,6 +164,84 @@ def parse_from_mongo(data):
         return result
     return data
 
+# =====================================================
+# PLAN VALIDATION FUNCTIONS
+# =====================================================
+async def check_plan_limit(user_id: str, limit_type: str) -> bool:
+    """
+    Verifica si el usuario ha alcanzado el límite de su plan
+    limit_type: 'projects', 'ai_analysis', 'chat_uploads', 'notes', 'tasks', 'habits'
+    """
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        return False
+    
+    plan = user.get("plan", "free")
+    limits = PLAN_LIMITS.get(plan, PLAN_LIMITS["free"])
+    
+    # Premium no tiene límites
+    if plan == "premium":
+        return True
+    
+    # Verificar límite según tipo
+    if limit_type == "projects":
+        project_count = await db.projects.count_documents({"user_id": user_id})
+        max_projects = limits["max_projects"]
+        return max_projects == -1 or project_count < max_projects
+    
+    elif limit_type == "ai_analysis":
+        # Resetear contador si es un nuevo día
+        today = datetime.now(timezone.utc).date().isoformat()
+        daily_usage = user.get("daily_usage", {})
+        
+        if daily_usage.get("date") != today:
+            # Nuevo día, resetear
+            await db.users.update_one(
+                {"id": user_id},
+                {"$set": {"daily_usage": {"date": today, "ai_analysis_count": 0, "chat_uploads_count": 0}}}
+            )
+            return True
+        
+        count = daily_usage.get("ai_analysis_count", 0)
+        max_count = limits["max_ai_analysis_per_day"]
+        return max_count == -1 or count < max_count
+    
+    elif limit_type == "chat_uploads":
+        today = datetime.now(timezone.utc).date().isoformat()
+        daily_usage = user.get("daily_usage", {})
+        
+        if daily_usage.get("date") != today:
+            await db.users.update_one(
+                {"id": user_id},
+                {"$set": {"daily_usage": {"date": today, "ai_analysis_count": 0, "chat_uploads_count": 0}}}
+            )
+            return True
+        
+        count = daily_usage.get("chat_uploads_count", 0)
+        max_count = limits["max_chat_uploads_per_day"]
+        return max_count == -1 or count < max_count
+    
+    elif limit_type in ["notes", "tasks", "habits"]:
+        collection_name = limit_type
+        item_count = await db[collection_name].count_documents({"user_id": user_id})
+        max_items = limits.get(f"max_{limit_type}", -1)
+        return max_items == -1 or item_count < max_items
+    
+    return True
+
+async def increment_usage(user_id: str, usage_type: str):
+    """Incrementa el contador de uso diario"""
+    today = datetime.now(timezone.utc).date().isoformat()
+    await db.users.update_one(
+        {"id": user_id},
+        {"$inc": {f"daily_usage.{usage_type}": 1}, "$set": {"daily_usage.date": today}}
+    )
+
+def get_plan_info(plan: str) -> dict:
+    """Retorna información del plan"""
+    return PLAN_LIMITS.get(plan, PLAN_LIMITS["free"])
+# =====================================================
+
 # Enhanced Pydantic Models for SUPER Assistant
 class UserCreate(BaseModel):
     email: EmailStr
