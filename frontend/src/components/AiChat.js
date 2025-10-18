@@ -46,9 +46,10 @@ const API = `${BACKEND_URL}/api`;
 
 const AiChat = () => {
   const { user } = useAuth();
+  const { assistantConfig } = useTheme();
   const [messages, setMessages] = useState([
     {
-      id: 1,
+      id: Date.now(),
       type: 'ai',
       content: `¡Hola ${user?.full_name?.split(' ')[0] || 'amigo'}! 👋 Soy tu Asistente-Definitivo con IA avanzada. 
 
