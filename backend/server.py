@@ -39,6 +39,56 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 720
 # Account limits
 MAX_ACCOUNTS_PER_USER = 4
 
+# =====================================================
+# PLAN LIMITS - EDITABLE DESDE AQUÍ
+# =====================================================
+PLAN_LIMITS = {
+    "free": {
+        "max_projects": 10,
+        "max_ai_analysis_per_day": 1,
+        "max_chat_uploads_per_day": 1,
+        "max_notes": 50,
+        "max_tasks": 100,
+        "max_habits": 5,
+        "features": {
+            "smart_scheduling": False,
+            "habit_tracking": True,
+            "ai_chat": True,
+            "document_analysis": True,
+            "project_uploads": True
+        }
+    },
+    "premium": {
+        "max_projects": -1,  # -1 = ilimitado
+        "max_ai_analysis_per_day": -1,
+        "max_chat_uploads_per_day": -1,
+        "max_notes": -1,
+        "max_tasks": -1,
+        "max_habits": -1,
+        "features": {
+            "smart_scheduling": True,
+            "habit_tracking": True,
+            "ai_chat": True,
+            "document_analysis": True,
+            "project_uploads": True,
+            "priority_support": True,
+            "advanced_automation": True
+        }
+    }
+}
+
+# Cuenta con Premium automático
+PREMIUM_ACCOUNT_EMAIL = "ortizisacc18@gmail.com"
+
+# Información de pago Nequi
+NEQUI_PAYMENT_INFO = {
+    "phone": "3215600837",
+    "name": "Neki Real",
+    "monthly_price": 29900,  # COP - Editable
+    "currency": "COP"
+}
+# =====================================================
+
 # FastAPI app
 app = FastAPI(title="Asistente-Definitivo SUPER API", version="3.0.0")
 api_router = APIRouter(prefix="/api")
