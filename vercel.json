@@ -6,7 +6,7 @@
       "use": "@vercel/static-build",
       "config": {
         "maxLambdaSize": "15mb",
-        "outputDirectory": "build",\n        "buildCommand": "cd frontend && npm run build"
+        "outputDirectory": "build"
       }
     },
     {
