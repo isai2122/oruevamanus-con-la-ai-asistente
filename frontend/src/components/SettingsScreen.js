@@ -210,11 +210,11 @@ const SettingsScreen = () => {
               <div className="flex items-center gap-6">
                 <div className="relative">
                   <Avatar className="w-20 h-20">
-                    {assistantConfig.photo ? (
-                      <AvatarImage src={assistantConfig.photo} alt={assistantConfig.name} />
+                    {localAssistantConfig.photo ? (
+                      <AvatarImage src={localAssistantConfig.photo} alt={localAssistantConfig.name} />
                     ) : (
                       <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-2xl font-bold">
-                        {assistantConfig.name.charAt(0)}
+                        {localAssistantConfig.name.charAt(0)}
                       </AvatarFallback>
                     )}
                   </Avatar>
@@ -240,7 +240,7 @@ const SettingsScreen = () => {
                 <Label htmlFor="assistant-name">Nombre del Asistente</Label>
                 <Input
                   id="assistant-name"
-                  value={assistantConfig.name}
+                  value={localAssistantConfig.name}
                   onChange={(e) => setAssistantConfig({ ...assistantConfig, name: e.target.value })}
                   placeholder="Nombre de tu asistente"
                   className="modern-input"
@@ -257,7 +257,7 @@ const SettingsScreen = () => {
                     <div
                       key={option.value}
                       className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                        assistantConfig.tone === option.value
+                        localAssistantConfig.tone === option.value
                           ? 'border-indigo-500 bg-indigo-50'
                           : 'border-slate-200 hover:border-slate-300 bg-white'
                       }`}
