@@ -103,46 +103,48 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={authContextValue}>
-      <BrowserRouter>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-          <Routes>
-            <Route 
-              path="/auth" 
-              element={!user ? <AuthScreen /> : <Navigate to="/" />} 
-            />
+    <ThemeProvider>
+      <AuthContext.Provider value={authContextValue}>
+        <BrowserRouter>
+          <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
+            <Routes>
+              <Route 
+                path="/auth" 
+                element={!user ? <AuthScreen /> : <Navigate to="/" />} 
+              />
+              
+              {user ? (
+                <Route path="/" element={<MainLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="chat" element={<AiChat />} />
+                  <Route path="habits" element={<HabitTracker />} />
+                  <Route path="notes" element={<NotesManager />} />
+                  <Route path="tasks" element={<TasksManager />} />
+                  <Route path="calendar" element={<CalendarView />} />
+                  <Route path="projects" element={<ProjectsManager />} />
+                  <Route path="support" element={<SupportCenter />} />
+                  <Route path="settings" element={<SettingsScreen />} />
+                </Route>
+              ) : (
+                <Route path="*" element={<Navigate to="/auth" />} />
+              )}
+            </Routes>
             
-            {user ? (
-              <Route path="/" element={<MainLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="chat" element={<AiChat />} />
-                <Route path="habits" element={<HabitTracker />} />
-                <Route path="notes" element={<NotesManager />} />
-                <Route path="tasks" element={<TasksManager />} />
-                <Route path="calendar" element={<CalendarView />} />
-                <Route path="projects" element={<ProjectsManager />} />
-                <Route path="support" element={<SupportCenter />} />
-                <Route path="settings" element={<SettingsScreen />} />
-              </Route>
-            ) : (
-              <Route path="*" element={<Navigate to="/auth" />} />
-            )}
-          </Routes>
-          
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#f8fafc',
-                color: '#1e293b',
-                border: '1px solid #e2e8f0'
-              }
-            }}
-          />
-        </div>
-      </BrowserRouter>
-    </AuthContext.Provider>
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: 'var(--color-surface)',
+                  color: 'var(--color-text)',
+                  border: '1px solid var(--color-border)'
+                }
+              }}
+            />
+          </div>
+        </BrowserRouter>
+      </AuthContext.Provider>
+    </ThemeProvider>
   );
 }
 
