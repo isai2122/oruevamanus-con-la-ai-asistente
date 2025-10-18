@@ -62,6 +62,7 @@ const SettingsScreen = () => {
 
   useEffect(() => {
     fetchAssistantConfig();
+    fetchPreferences();
   }, []);
 
   const fetchAssistantConfig = async () => {
@@ -73,6 +74,15 @@ const SettingsScreen = () => {
     }
   };
 
+  const fetchPreferences = async () => {
+    try {
+      const response = await axios.get(`${API}/user/preferences`);
+      setPreferences(response.data);
+    } catch (error) {
+      console.error('Error fetching preferences:', error);
+    }
+  };
+
   const saveAssistantConfig = async () => {
     setLoading(true);
     try {
@@ -81,6 +91,19 @@ const SettingsScreen = () => {
     } catch (error) {
       console.error('Error saving assistant config:', error);
       toast.error('Error al guardar configuración');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const savePreferences = async () => {
+    setLoading(true);
+    try {
+      await axios.put(`${API}/user/preferences`, preferences);
+      toast.success('Preferencias guardadas');
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast.error('Error al guardar preferencias');
     } finally {
       setLoading(false);
     }
