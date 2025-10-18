@@ -126,8 +126,8 @@ const SettingsScreen = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setAssistantConfig({
-          ...assistantConfig,
+        setLocalAssistantConfig({
+          ...localAssistantConfig,
           photo: e.target.result
         });
       };
@@ -138,7 +138,7 @@ const SettingsScreen = () => {
   const exportData = () => {
     const data = {
       user: user,
-      assistantConfig: assistantConfig,
+      assistantConfig: localAssistantConfig,
       notifications: notifications,
       preferences: preferences,
       exportDate: new Date().toISOString()
