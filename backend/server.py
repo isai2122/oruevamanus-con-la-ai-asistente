@@ -84,8 +84,9 @@ PREMIUM_ACCOUNT_EMAIL = "ortizisacc18@gmail.com"
 NEQUI_PAYMENT_INFO = {
     "phone": "3215600837",
     "name": "Neki Real",
-    "monthly_price": 29900,  # COP - Editable
-    "currency": "COP"
+    "monthly_price_cop": 50000,  # COP - Editable
+    "monthly_price_usd": 10,  # USD - Editable
+    "currency": "COP/USD"
 }
 # =====================================================
 
