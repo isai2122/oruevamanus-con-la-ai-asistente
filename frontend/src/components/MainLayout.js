@@ -16,7 +16,8 @@ import {
   Zap,
   Flame,
   Headphones,
-  Puzzle
+  Puzzle,
+  Crown
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
