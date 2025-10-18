@@ -39,7 +39,8 @@ const API = `${BACKEND_URL}/api`;
 
 const SettingsScreen = () => {
   const { user } = useAuth();
-  const [assistantConfig, setAssistantConfig] = useState({
+  const { currentPalette, changePalette, assistantConfig, updateAssistantConfig } = useTheme();
+  const [localAssistantConfig, setLocalAssistantConfig] = useState({
     name: 'Asistente',
     photo: '',
     tone: 'amable'
