@@ -1413,7 +1413,20 @@ async def analyze_document(
 ):
     """Analyze document with AI and optionally save to projects"""
     try:
+        # Verificar límite de análisis IA
+        if not await check_plan_limit(current_user["id"], "ai_analysis"):
+            user = await db.users.find_one({"id": current_user["id"]})
+            plan = user.get("plan", "free")
+            limit = PLAN_LIMITS[plan]["max_ai_analysis_per_day"]
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Límite de {limit} análisis IA por día alcanzado. Actualiza a Premium para análisis ilimitados."
+            )
+        
         print(f"Analyzing document: {file.filename}, action: {action}")
+        
+        # Incrementar contador de uso
+        await increment_usage(current_user["id"], "ai_analysis_count")
         
         # Read file content
         content = await file.read()
