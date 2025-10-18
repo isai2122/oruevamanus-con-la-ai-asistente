@@ -27,5 +27,5 @@
       "dest": "frontend/$1"
     }
   ],
-  "installCommand": "pip install -r backend/requirements.txt && cd frontend && npm install"
+  "installCommand": "pip install -r backend/requirements.txt && cd frontend && npm install --legacy-peer-deps"
 }
