@@ -861,7 +861,7 @@ const AiChat = () => {
             <span>Enter = enviar • Shift+Enter = nueva línea • 🎤 = dictado por voz</span>
             <div className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              <span>IA Contextual GPT-4o • Clave Emergent</span>
+              <span>IA Contextual GPT-4o</span>
             </div>
           </div>
         </div>
