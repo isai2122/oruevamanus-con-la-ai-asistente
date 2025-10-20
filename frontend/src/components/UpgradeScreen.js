@@ -66,8 +66,35 @@ const UpgradeScreen = () => {
   };
 
   const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copiado al portapapeles');
+    // Fallback para navegadores que bloquean clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => toast.success('Copiado al portapapeles'))
+        .catch(() => {
+          // Fallback si clipboard API falla
+          fallbackCopy(text);
+        });
+    } else {
+      // Usar método antiguo
+      fallbackCopy(text);
+    }
+  };
+
+  const fallbackCopy = (text) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      toast.success('Copiado al portapapeles');
+    } catch (err) {
+      toast.error('No se pudo copiar');
+    }
+    document.body.removeChild(textArea);
   };
 
   const handleUpgrade = () => {
