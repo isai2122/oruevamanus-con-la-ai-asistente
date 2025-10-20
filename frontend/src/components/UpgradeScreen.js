@@ -8,17 +8,15 @@ import {
   TrendingUp,
   Shield,
   Rocket,
-  Phone,
-  Mail,
-  Copy,
   CheckCircle2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent } from './ui/dialog';
 import axios from 'axios';
 import { toast } from 'sonner';
+import NequiCheckout from './NequiCheckout';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
