@@ -551,3 +551,29 @@ agent_communication:
       - Usuarios Free ahora ven mensaje claro: "Límite de 1 análisis IA por día alcanzado"
       - Usuarios Premium no deberían ver este error (cuenta ortizisacc18@gmail.com tiene premium automático)
       - Errores 500 solo ocurren para problemas técnicos reales, no para límites de plan
+  - agent: "testing"
+    message: |
+      🎯 CORRECCIÓN DE MANEJO DE ERRORES VERIFICADA EXITOSAMENTE:
+      
+      **Endpoints probados:**
+      ✅ /api/ai/analyze-document:
+      - Primer análisis del día: 200 OK (funciona correctamente)
+      - Segundo análisis del día: 403 Forbidden (no 500)
+      - Mensaje correcto: "Límite de 1 análisis IA por día alcanzado. Actualiza a Premium para análisis ilimitados."
+      
+      ✅ /api/projects/upload:
+      - Primeros 10 proyectos: 200 OK (funciona correctamente)
+      - Proyecto 11: 403 Forbidden (no 500)
+      - Mensaje correcto sobre límite de proyectos
+      
+      **Verificación técnica:**
+      - HTTPException se re-lanza correctamente (líneas 1583-1585 y 1352-1354)
+      - FastAPI maneja los códigos de estado apropiadamente
+      - No más conversión de 403 a 500
+      - Logs del backend confirman respuestas 403 correctas
+      
+      **Limitación encontrada:**
+      - No se pudo probar cuenta premium ortizisacc18@gmail.com (credenciales no disponibles)
+      - Pero la lógica de premium está implementada correctamente en el código
+      
+      **Resultado:** ✅ CORRECCIÓN EXITOSA - Error handling funciona como se esperaba
