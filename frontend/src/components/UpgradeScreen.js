@@ -240,75 +240,12 @@ const UpgradeScreen = () => {
 
       {/* Payment Modal */}
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl">
-              <Phone className="w-6 h-6 text-indigo-600" />
-              Instrucciones de Pago - Nequi
-            </DialogTitle>
-          </DialogHeader>
-
-          {paymentInfo && (
-            <div className="space-y-6 py-4">
-              {/* Price */}
-              <div className="text-center p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg">
-                <p className="text-sm text-slate-600 mb-2">Precio Mensual</p>
-                <p className="text-4xl font-bold text-slate-900">
-                  ${paymentInfo.price_cop.toLocaleString()} COP
-                </p>
-                <p className="text-slate-600 mt-1">o ${paymentInfo.price_usd} USD</p>
-              </div>
-
-              {/* Nequi Info */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div>
-                    <p className="text-xs text-slate-600">Número Nequi</p>
-                    <p className="text-lg font-semibold text-slate-900">{paymentInfo.phone}</p>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => copyToClipboard(paymentInfo.phone)}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-600">Nombre</p>
-                  <p className="text-lg font-semibold text-slate-900">{paymentInfo.name}</p>
-                </div>
-              </div>
-
-              {/* Instructions */}
-              <div className="space-y-2">
-                <p className="font-semibold text-slate-900 mb-3">Pasos para pagar:</p>
-                {paymentInfo.instructions.map((instruction, index) => (
-                  <div key={index} className="flex gap-2 text-sm text-slate-700">
-                    <span className="font-semibold text-indigo-600">{instruction.split('.')[0]}.</span>
-                    <span>{instruction.substring(instruction.indexOf('.') + 1)}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Contact */}
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-900 flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  <span>Envía tu comprobante a: <strong>ortizisacc18@gmail.com</strong></span>
-                </p>
-              </div>
-
-              {/* Note */}
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-xs text-blue-900">
-                  <Shield className="w-4 h-4 inline mr-1" />
-                  {paymentInfo.note}
-                </p>
-              </div>
-            </div>
-          )}
+        <DialogContent className="sm:max-w-2xl">
+          <NequiCheckout 
+            onBack={handlePaymentBack}
+            onSuccess={handlePaymentSuccess}
+            amount={paymentInfo?.price_cop || 50000}
+          />
         </DialogContent>
       </Dialog>
     </div>
