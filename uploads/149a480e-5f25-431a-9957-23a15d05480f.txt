@@ -1,0 +1,11 @@
+Este es un documento de prueba con información importante.
+
+Tareas pendientes:
+- Llamar al cliente mañana a las 10:00 AM
+- Enviar reporte del proyecto antes del viernes
+- Revisar presupuesto para Q1 2024
+
+Información clave:
+- Presupuesto asignado: 0,000
+- Responsable: Juan Pérez
+- Fecha límite: 15 de diciembre 2024
