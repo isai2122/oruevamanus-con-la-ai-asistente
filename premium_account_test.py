@@ -44,17 +44,16 @@ def make_request(method: str, endpoint: str, data=None, files=None, token=None):
 
 def test_premium_account():
     """Test premium account functionality"""
-    print("🔍 Testing Premium Account Creation and Functionality...")
+    print("🔍 Testing Premium Account Login and Functionality...")
     
-    # Create premium account (ortizisacc18@gmail.com gets premium automatically)
-    register_data = {
+    # Login with premium account (ortizisacc18@gmail.com gets premium automatically)
+    login_data = {
         "email": "ortizisacc18@gmail.com",
         "password": "PremiumTest123!",
-        "full_name": "Premium Test User",
         "device_id": f"premium_device_{int(time.time())}"
     }
     
-    success, status_code, data = make_request('POST', '/auth/register', register_data)
+    success, status_code, data = make_request('POST', '/auth/login', login_data)
     
     if success and status_code == 200:
         token = data['access_token']
