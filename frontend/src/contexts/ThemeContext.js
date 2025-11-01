@@ -105,7 +105,7 @@ export const COLOR_PALETTES = {
 export const ThemeProvider = ({ children }) => {
   const [currentPalette, setCurrentPalette] = useState('light');
   const [assistantConfig, setAssistantConfig] = useState({
-    name: 'Asistente',
+    name: 'Jika',
     photo: '',
     tone: 'amable'
   });
