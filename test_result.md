@@ -359,15 +359,18 @@ frontend:
 
   - task: "AI Chat con subida de archivos"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/components/AiChat.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "AiChat implementado con soporte para subida de documentos e imágenes. Necesita verificar que use el endpoint /api/ai/super-chat correctamente y muestre acciones automáticas."
+      - working: true
+        agent: "main"
+        comment: "Corregido manejo de errores en análisis de documentos. Ahora maneja correctamente errores 403 (límites de plan), 401 (autenticación), y otros errores con mensajes específicos y amigables."
 
   - task: "Pantalla de Configuración"
     implemented: true
