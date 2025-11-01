@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-01T23:10:27.644779",
+  "timestamp": "2025-11-01T23:11:54.036895",
   "backend_url": "https://jika-taskmaster.preview.emergentagent.com",
   "test_type": "document_analysis_error_handling",
   "total_tests": 17,
@@ -10,9 +10,9 @@
     {
       "name": "Create free account for testing",
       "success": true,
-      "details": "Account created: free_test_1762038623@example.com",
+      "details": "Account created: free_test_1762038710@example.com",
       "response_data": {
-        "email": "free_test_1762038623@example.com",
+        "email": "free_test_1762038710@example.com",
         "plan": "free"
       }
     },
@@ -32,7 +32,7 @@
         "filename": "test_document.txt",
         "file_type": ".txt",
         "size": 322,
-        "analysis": "1. **Resumen ejecutivo**:  \nEste documento detalla tareas pendientes cruciales, como contactar a un cliente y enviar un informe, y proporciona informaci\u00f3n sobre el presupuesto y responsabilidad de un proyecto cuya fecha l\u00edmite es el 15 de diciembre de 2024. Las acciones est\u00e1n asignadas a Juan P\u00e9rez, enfatizando la importancia de la gesti\u00f3n financiera y de tiempo para el pr\u00f3ximo a\u00f1o.\n\n2. **Puntos clave**:\n   - La llamada al cliente est\u00e1 programada para las 10:00 AM de ma\u00f1ana.\n   - El reporte del proyecto debe enviarse antes del viernes.\n   - Revisar el presupuesto para el primer trimestre de 2024.\n   - El presupuesto asignado es de 0,000.\n   - Juan P\u00e9rez es el responsable del proyecto con fecha l\u00edmite el 15 de diciembre de 2024.\n\n3. **Tareas o acciones detectadas**:\n   - Llamar al cliente ma\u00f1ana a las 10:00 AM.\n   - Enviar el reporte del proyecto antes del viernes.\n   - Revisar el presupuesto para el primer trimestre de 2024.\n\n4. **Informaci\u00f3n importante**:\n   - Presupuesto asignado: 0,000.\n   - Responsable: Juan P\u00e9rez.\n   - Fecha l\u00edmite: 15 de diciembre de 2024.",
+        "analysis": "1. **Resumen ejecutivo**: El documento es una gu\u00eda para gestionar tareas pendientes y recopila informaci\u00f3n clave para un proyecto en curso. Se detallan acciones espec\u00edficas junto con datos importantes como presupuestos y fechas l\u00edmite.\n\n2. **Puntos clave**:\n   - Se deben completar tres tareas urgentes: llamar al cliente, enviar un reporte, y revisar un presupuesto.\n   - El presupuesto asignado actualmente es de $0,000.\n   - Juan P\u00e9rez es el responsable del proyecto.\n   - La fecha l\u00edmite para las tareas es el 15 de diciembre de 2024.\n\n3. **Tareas o acciones detectadas**:\n   - Llamar al cliente ma\u00f1ana a las 10:00 AM.\n   - Enviar el reporte del proyecto antes del viernes.\n   - Revisar el presupuesto para el primer trimestre de 2024.\n\n4. **Informaci\u00f3n importante**:\n   - Presupuesto asignado: 0,000.\n   - Responsable: Juan P\u00e9rez.\n   - Fecha l\u00edmite para las tareas: 15 de diciembre de 2024.",
         "extracted_text_length": 317
       }
     },
@@ -59,17 +59,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "e607d878-9585-44f5-871d-f074f80265ab",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "73280bd4-f270-4564-8c79-c86683e5c36c",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 0",
           "description": "Test project number 0",
           "file_name": "test_project_0.txt",
-          "file_path": "/app/uploads/a3f59842-10c2-4235-a652-3328b04dc0a7.txt",
+          "file_path": "/app/uploads/dcf385a2-7e8a-4a52-820c-e066d18b5a95.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:26.942667+00:00",
-          "updated_date": "2025-11-01T23:10:26.942669+00:00",
+          "created_date": "2025-11-01T23:11:53.336668+00:00",
+          "updated_date": "2025-11-01T23:11:53.336671+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -82,17 +82,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "7a202a47-a2f0-4f76-a609-5546492af684",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "8ba35818-bec5-4153-8933-b446e62db997",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 1",
           "description": "Test project number 1",
           "file_name": "test_project_1.txt",
-          "file_path": "/app/uploads/79db2b78-b893-46fb-bb85-ff13f84c914b.txt",
+          "file_path": "/app/uploads/8df5bda5-33ce-46fc-ae40-6a09584b1a37.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:26.983672+00:00",
-          "updated_date": "2025-11-01T23:10:26.983674+00:00",
+          "created_date": "2025-11-01T23:11:53.414704+00:00",
+          "updated_date": "2025-11-01T23:11:53.414706+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -105,17 +105,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "1a50b35d-0816-4ffe-b59c-1e45b0169d00",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "eb50aeb2-1c61-408a-b2c9-f712e1eb68da",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 2",
           "description": "Test project number 2",
           "file_name": "test_project_2.txt",
-          "file_path": "/app/uploads/da87c4ac-45ea-4d3e-af3d-ca81ae948acc.txt",
+          "file_path": "/app/uploads/b7b0c464-1bb3-4ec2-a07b-8ff1c137171e.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:27.027476+00:00",
-          "updated_date": "2025-11-01T23:10:27.027479+00:00",
+          "created_date": "2025-11-01T23:11:53.455048+00:00",
+          "updated_date": "2025-11-01T23:11:53.455050+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -128,17 +128,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "63d99d87-2b13-4cd4-853a-78480ed47085",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "731592ea-cc7d-4b7c-bf26-dbcc9fd454b5",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 3",
           "description": "Test project number 3",
           "file_name": "test_project_3.txt",
-          "file_path": "/app/uploads/ccf64398-3978-42f2-a678-19cfd6df9550.txt",
+          "file_path": "/app/uploads/b79c81e2-5f92-4d8f-b225-e713ff44c382.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:27.065138+00:00",
-          "updated_date": "2025-11-01T23:10:27.065141+00:00",
+          "created_date": "2025-11-01T23:11:53.491058+00:00",
+          "updated_date": "2025-11-01T23:11:53.491061+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -151,17 +151,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "eadd3046-3501-447f-8a46-14875a05a5fa",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "09b234e3-1cfa-44b1-b458-9a9bbac682e2",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 4",
           "description": "Test project number 4",
           "file_name": "test_project_4.txt",
-          "file_path": "/app/uploads/9089eb57-de50-415b-8da3-2a185c08d8ea.txt",
+          "file_path": "/app/uploads/1e3dc4ec-70f6-43f9-9af8-873a18464cd7.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:27.105246+00:00",
-          "updated_date": "2025-11-01T23:10:27.105249+00:00",
+          "created_date": "2025-11-01T23:11:53.528191+00:00",
+          "updated_date": "2025-11-01T23:11:53.528194+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -174,17 +174,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "18ed9655-d509-4cd5-b68f-a71a256e34e0",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "61855586-caa5-4558-8402-492b5d35ef16",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 5",
           "description": "Test project number 5",
           "file_name": "test_project_5.txt",
-          "file_path": "/app/uploads/149a480e-5f25-431a-9957-23a15d05480f.txt",
+          "file_path": "/app/uploads/ccea52e2-ef00-4e56-bd4d-0bc46584eb05.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:27.144383+00:00",
-          "updated_date": "2025-11-01T23:10:27.144385+00:00",
+          "created_date": "2025-11-01T23:11:53.571026+00:00",
+          "updated_date": "2025-11-01T23:11:53.571028+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -197,17 +197,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "efc4df29-af66-4816-97d4-e285e0b38427",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "ee754bd9-f039-4b1b-af9a-78aba4fa997d",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 6",
           "description": "Test project number 6",
           "file_name": "test_project_6.txt",
-          "file_path": "/app/uploads/8d048523-c918-49a5-bd77-163468fd8294.txt",
+          "file_path": "/app/uploads/d3f8a06c-c4d1-41d2-a98d-9768232865fc.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:27.185350+00:00",
-          "updated_date": "2025-11-01T23:10:27.185353+00:00",
+          "created_date": "2025-11-01T23:11:53.612373+00:00",
+          "updated_date": "2025-11-01T23:11:53.612376+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -220,17 +220,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "6cf47a95-42e0-4e37-9683-4d0ec7053c9a",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "008dc605-c178-46e3-b8ac-a0d443d39144",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 7",
           "description": "Test project number 7",
           "file_name": "test_project_7.txt",
-          "file_path": "/app/uploads/796dbf73-acf1-4d0e-9b7b-450e88f48554.txt",
+          "file_path": "/app/uploads/fa3b82d4-7f06-40c8-b2d6-4ec52f1ee58a.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:27.223129+00:00",
-          "updated_date": "2025-11-01T23:10:27.223132+00:00",
+          "created_date": "2025-11-01T23:11:53.648816+00:00",
+          "updated_date": "2025-11-01T23:11:53.648818+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -243,17 +243,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "61f878b1-04c6-4159-871e-0b376d153fc5",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "ab5252b4-a91e-4b3b-a4a5-8a209134b770",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 8",
           "description": "Test project number 8",
           "file_name": "test_project_8.txt",
-          "file_path": "/app/uploads/1ac898bf-e1b5-4426-87ff-dd90ac8ae432.txt",
+          "file_path": "/app/uploads/53fec656-c2ab-44d5-9b5a-1cb4258e6f7a.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:27.300935+00:00",
-          "updated_date": "2025-11-01T23:10:27.300938+00:00",
+          "created_date": "2025-11-01T23:11:53.686895+00:00",
+          "updated_date": "2025-11-01T23:11:53.686898+00:00",
           "ai_analysis": null,
           "tags": []
         }
@@ -266,17 +266,17 @@
       "response_data": {
         "message": "Proyecto subido exitosamente",
         "project": {
-          "id": "0a2c615d-74dc-4860-b872-4792c631d84a",
-          "user_id": "5ba936e8-c0ec-422b-8496-b9aa145aa492",
+          "id": "3cbb1c27-b469-4de0-8490-fdc92e31ae90",
+          "user_id": "7ba309d9-45c1-493e-acfd-4133def689e1",
           "name": "Test Project 9",
           "description": "Test project number 9",
           "file_name": "test_project_9.txt",
-          "file_path": "/app/uploads/793b974d-8acb-47ec-8615-b3c75001012a.txt",
+          "file_path": "/app/uploads/d085af41-58df-4760-a335-19c98fc529e6.txt",
           "file_size": 322,
           "file_type": "text/plain",
           "status": "active",
-          "created_date": "2025-11-01T23:10:27.340907+00:00",
-          "updated_date": "2025-11-01T23:10:27.340910+00:00",
+          "created_date": "2025-11-01T23:11:53.726482+00:00",
+          "updated_date": "2025-11-01T23:11:53.726484+00:00",
           "ai_analysis": null,
           "tags": []
         }
