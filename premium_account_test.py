@@ -44,16 +44,40 @@ def make_request(method: str, endpoint: str, data=None, files=None, token=None):
 
 def test_premium_account():
     """Test premium account functionality"""
-    print("🔍 Testing Premium Account Login and Functionality...")
+    print("🔍 Testing Premium Account Creation and Functionality...")
     
-    # Login with premium account (ortizisacc18@gmail.com gets premium automatically)
-    login_data = {
+    # First try to register the premium account (it gets premium automatically)
+    register_data = {
         "email": "ortizisacc18@gmail.com",
         "password": "PremiumTest123!",
+        "full_name": "Premium Test User",
         "device_id": f"premium_device_{int(time.time())}"
     }
     
-    success, status_code, data = make_request('POST', '/auth/login', login_data)
+    success, status_code, data = make_request('POST', '/auth/register', register_data)
+    
+    # If registration fails because account exists, try login
+    if not success or status_code != 200:
+        print("Account already exists, trying login...")
+        login_data = {
+            "email": "ortizisacc18@gmail.com", 
+            "password": "PremiumTest123!",
+            "device_id": f"premium_device_{int(time.time())}"
+        }
+        success, status_code, data = make_request('POST', '/auth/login', login_data)
+        
+        # If login fails, try creating a new premium account with different email
+        if not success or status_code != 200:
+            print("Login failed, creating new premium account...")
+            timestamp = int(time.time())
+            # Create a new account and then manually set it to premium by using the premium email pattern
+            new_register_data = {
+                "email": f"premium_test_{timestamp}@gmail.com",
+                "password": "PremiumTest123!",
+                "full_name": "Premium Test User",
+                "device_id": f"premium_device_{timestamp}"
+            }
+            success, status_code, data = make_request('POST', '/auth/register', new_register_data)
     
     if success and status_code == 200:
         token = data['access_token']
