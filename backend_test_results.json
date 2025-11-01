@@ -1,6 +1,6 @@
 {
   "timestamp": "2025-10-17T21:25:36.948024",
-  "backend_url": "https://asistente-definitivo.preview.emergentagent.com",
+  "backend_url": "https://jika-taskmaster.preview.emergentagent.com",
   "total_tests": 25,
   "passed_tests": 16,
   "failed_tests": 9,

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
 # Configuration
-BACKEND_URL = "https://asistente-definitivo.preview.emergentagent.com"
+BACKEND_URL = "https://jika-taskmaster.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class AsistenteDefinitivoTester:
