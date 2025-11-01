@@ -284,6 +284,21 @@ backend:
         agent: "testing"
         comment: "✅ ALTO PRIORIDAD APROBADO: Super Dashboard funciona perfectamente. Métricas avanzadas confirmadas: productivity_score, hábitos activos, dispositivos conectados, integraciones activas, insights de IA y acciones rápidas."
 
+  - task: "Análisis de Documentos con IA"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Error 500 persistente al analizar documentos. Probablemente relacionado con límites de plan y manejo de errores."
+      - working: true
+        agent: "main"
+        comment: "Corregido manejo de excepciones en /api/ai/analyze-document (línea 1407-1585). HTTPException ahora se re-lanza correctamente para que FastAPI la maneje. Los errores 403 (límites de plan) ya no se convierten en 500. También corregido en /api/projects/upload."
+
 frontend:
   - task: "Pantalla de Autenticación (Login/Registro)"
     implemented: true
