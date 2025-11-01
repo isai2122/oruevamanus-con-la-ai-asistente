@@ -91,7 +91,7 @@ NEQUI_PAYMENT_INFO = {
 # =====================================================
 
 # FastAPI app
-app = FastAPI(title="Asistente-Definitivo SUPER API", version="3.0.0")
+app = FastAPI(title="Jika SUPER API", version="3.0.0")
 api_router = APIRouter(prefix="/api")
 
 # Security
@@ -270,7 +270,7 @@ class User(BaseModel):
     })
     preferences: Dict[str, Any] = Field(default_factory=dict)
     assistant_config: Dict[str, Any] = Field(default_factory=lambda: {
-        "name": "Asistente-Definitivo",
+        "name": "Jika",
         "photo": "",
         "tone": "energetico",
         "specializations": ["productivity", "scheduling", "automation", "support"]
@@ -460,7 +460,7 @@ async def get_super_ai_chat(messages: List[Dict[str, str]], user_id: str, user_d
         assistant_config = user_data.get("assistant_config", {}) if user_data else {}
         
         # Build SUPER system message combining all assistant capabilities
-        system_message = f"""Eres {assistant_config.get('name', 'Asistente-Definitivo')}, el ASISTENTE PERSONAL MÁS AVANZADO que combina todas las mejores capacidades:
+        system_message = f"""Eres {assistant_config.get('name', 'Jika')}, el ASISTENTE PERSONAL MÁS AVANZADO que combina todas las mejores capacidades:
 
 🎯 PERSONALIDAD: {assistant_config.get('tone', 'energetico').upper()}
 - amable: Cálido, empático y cercano
@@ -1601,7 +1601,7 @@ async def get_assistant_config(current_user: dict = Depends(get_current_user)):
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         
         assistant_config = user.get("assistant_config", {
-            "name": "Asistente-Definitivo",
+            "name": "Jika",
             "photo": "",
             "tone": "energetico",
             "specializations": ["productivity", "scheduling", "automation", "support"]
@@ -1808,7 +1808,7 @@ logger = logging.getLogger(__name__)
 
 @api_router.get("/")
 async def root():
-    return {"message": "🚀 Asistente-Definitivo SUPER API funcionando!", "version": "3.0.0"}
+    return {"message": "🚀 Jika SUPER API funcionando!", "version": "3.0.0"}
 
 @api_router.get("/health")
 async def health_check():

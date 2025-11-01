@@ -169,7 +169,7 @@ const SettingsScreen = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Configuración</h1>
-        <p className="text-slate-600">Personaliza tu experiencia con Asistente-Definitivo</p>
+        <p className="text-slate-600">Personaliza tu experiencia con Jika</p>
       </div>
 
       <Tabs defaultValue="assistant" className="space-y-6">

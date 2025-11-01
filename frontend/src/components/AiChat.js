@@ -51,7 +51,7 @@ const AiChat = () => {
     {
       id: Date.now(),
       type: 'ai',
-      content: `¡Hola ${user?.full_name?.split(' ')[0] || 'amigo'}! 👋 Soy tu Asistente-Definitivo con IA avanzada. 
+      content: `¡Hola ${user?.full_name?.split(' ')[0] || 'amigo'}! 👋 Soy tu Jika con IA avanzada. 
 
 🚀 Puedo ayudarte con CUALQUIER COSA:
 • **Crear tareas automáticamente** - solo dime "tengo que hacer X" y las creo
@@ -596,7 +596,7 @@ const AiChat = () => {
                   <div className="flex items-center gap-2 mt-2 px-1">
                     {message.type === 'ai' && (
                       <span className="text-xs font-semibold text-indigo-600">
-                        {assistantConfig.name || 'Asistente-Definitivo'}
+                        {assistantConfig.name || 'Jika'}
                       </span>
                     )}
                     <span className="text-xs text-slate-500">

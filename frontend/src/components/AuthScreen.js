@@ -67,7 +67,7 @@ const AuthScreen = () => {
           <div className="space-y-4">
             <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 leading-tight">
               <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Asistente-Definitivo
+                Jika
               </span>
             </h1>
             <p className="text-xl text-slate-600 leading-relaxed max-w-2xl">

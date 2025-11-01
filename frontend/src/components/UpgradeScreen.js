@@ -93,7 +93,7 @@ const UpgradeScreen = () => {
           Actualiza a Premium
         </h1>
         <p className="text-xl text-slate-600">
-          Desbloquea todo el potencial del Asistente-Definitivo con funcionalidades SUPER ilimitadas
+          Desbloquea todo el potencial del Jika con funcionalidades SUPER ilimitadas
         </p>
       </div>
 

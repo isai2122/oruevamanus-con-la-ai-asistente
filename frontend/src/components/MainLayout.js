@@ -76,7 +76,7 @@ const MainLayout = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold gradient-text">Asistente-Definitivo</h1>
+            <h1 className="text-xl font-bold gradient-text">Jika</h1>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -154,7 +154,7 @@ const MainLayout = () => {
           >
             <Menu className="w-6 h-6" />
           </button>
-          <h1 className="text-lg font-semibold gradient-text">Asistente-Definitivo</h1>
+          <h1 className="text-lg font-semibold gradient-text">Jika</h1>
         </header>
 
         {/* Page Content */}

@@ -361,7 +361,7 @@ const SuperDashboard = () => {
               <thead>
                 <tr className="border-b border-slate-200">
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Capacidad</th>
-                  <th className="text-center py-3 px-4 font-semibold text-indigo-700">Asistente-Definitivo</th>
+                  <th className="text-center py-3 px-4 font-semibold text-indigo-700">Jika</th>
                   <th className="text-center py-3 px-4 font-medium text-slate-500">Motion</th>
                   <th className="text-center py-3 px-4 font-medium text-slate-500">Google Assistant</th>
                   <th className="text-center py-3 px-4 font-medium text-slate-500">Alexa</th>
@@ -395,7 +395,7 @@ const SuperDashboard = () => {
           <div className="mt-6 p-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-5 h-5 text-green-700" />
-              <span className="font-bold text-green-800">Resultado: Asistente-Definitivo SUPERA a todos</span>
+              <span className="font-bold text-green-800">Resultado: Jika SUPERA a todos</span>
             </div>
             <p className="text-green-700 text-sm">
               Combinamos lo mejor de Motion + Reclaim + Clockwise + Google Assistant + Alexa + Siri + eesel AI 
