@@ -298,6 +298,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Corregido manejo de excepciones en /api/ai/analyze-document (línea 1407-1585). HTTPException ahora se re-lanza correctamente para que FastAPI la maneje. Los errores 403 (límites de plan) ya no se convierten en 500. También corregido en /api/projects/upload."
+      - working: true
+        agent: "testing"
+        comment: "✅ CORRECCIÓN VERIFICADA: Análisis de documentos funciona correctamente. Primer análisis del día exitoso (200), segundo análisis retorna 403 con mensaje claro 'Límite de 1 análisis IA por día alcanzado. Actualiza a Premium para análisis ilimitados.' Los errores 403 ya no se convierten en 500. También verificado en /api/projects/upload con límite de 10 proyectos para cuentas free."
 
 frontend:
   - task: "Pantalla de Autenticación (Login/Registro)"
