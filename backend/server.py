@@ -1507,10 +1507,22 @@ Contenido:
                 
                 user_message = UserMessage(text=ai_prompt)
                 response = await chat.send_message(user_message)
-                ai_analysis = response.text
+                
+                # Manejar diferentes tipos de respuesta
+                if isinstance(response, str):
+                    ai_analysis = response
+                elif hasattr(response, 'text'):
+                    ai_analysis = response.text
+                elif hasattr(response, 'content'):
+                    ai_analysis = response.content
+                else:
+                    ai_analysis = str(response)
+                    
                 print(f"AI analysis completed successfully")
             except Exception as e:
                 print(f"Error getting AI analysis: {e}")
+                import traceback
+                traceback.print_exc()
                 ai_analysis = f"""
 **Resumen ejecutivo:**
 Archivo procesado: {file.filename}
