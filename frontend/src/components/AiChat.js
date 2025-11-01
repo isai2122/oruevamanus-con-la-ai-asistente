@@ -386,8 +386,29 @@ const AiChat = () => {
         
       } catch (error) {
         console.error('Error analyzing file:', file.name, error);
-        analysisResults += `❌ Error analizando ${file.name}\n`;
-        toast.error(`Error procesando ${file.name}`);
+        
+        // Handle different error types with specific messages
+        if (error.response) {
+          const status = error.response.status;
+          const detail = error.response.data?.detail || 'Error desconocido';
+          
+          if (status === 403) {
+            // Plan limit reached
+            analysisResults += `⚠️ **${file.name}**: ${detail}\n`;
+            toast.error(detail, { duration: 5000 });
+          } else if (status === 401) {
+            // Authentication error
+            analysisResults += `🔒 **${file.name}**: Sesión expirada. Por favor inicia sesión nuevamente.\n`;
+            toast.error('Sesión expirada');
+          } else {
+            // Other errors
+            analysisResults += `❌ **${file.name}**: ${detail}\n`;
+            toast.error(`Error: ${detail}`);
+          }
+        } else {
+          analysisResults += `❌ Error analizando ${file.name}\n`;
+          toast.error(`Error procesando ${file.name}`);
+        }
       }
     }
     
