@@ -521,3 +521,30 @@ agent_communication:
       
       El "Asistente-Definitivo" tiene TODAS las capacidades SÚPER funcionando.
       Solo faltan los endpoints CRUD básicos que el main agent debe implementar.
+  - agent: "main"
+    message: |
+      🔧 CORRECCIÓN DE ERROR 500 EN ANÁLISIS DE DOCUMENTOS:
+      
+      **Problema identificado:**
+      - Los usuarios reportaban error 500 al analizar documentos
+      - El límite de plan Free (1 análisis/día) lanzaba HTTPException con código 403
+      - El manejo genérico de excepciones capturaba TODAS las excepciones y las convertía en 500
+      
+      **Solución implementada:**
+      Backend (/app/backend/server.py):
+      1. Agregado manejo específico para HTTPException antes del catch genérico (línea 1579)
+      2. HTTPException ahora se re-lanza correctamente para que FastAPI la maneje
+      3. Aplicado el mismo fix en endpoint /api/projects/upload (línea 1352)
+      4. Agregado traceback para mejor debugging
+      
+      Frontend (/app/frontend/src/components/AiChat.js):
+      1. Mejorado manejo de errores en analyzeUploadedFiles (línea 387-405)
+      2. Detecta errores 403 (límites de plan) y muestra mensaje específico del backend
+      3. Detecta errores 401 (sesión expirada) y solicita re-login
+      4. Maneja otros códigos de error con mensajes detallados
+      5. Toast notifications con duración extendida para errores importantes
+      
+      **Resultado:**
+      - Usuarios Free ahora ven mensaje claro: "Límite de 1 análisis IA por día alcanzado"
+      - Usuarios Premium no deberían ver este error (cuenta ortizisacc18@gmail.com tiene premium automático)
+      - Errores 500 solo ocurren para problemas técnicos reales, no para límites de plan
