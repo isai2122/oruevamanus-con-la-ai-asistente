@@ -1349,7 +1349,12 @@ async def upload_project(
         await db.projects.insert_one(project_dict)
         
         return {"message": "Proyecto subido exitosamente", "project": parse_from_mongo(project_dict)}
+    except HTTPException:
+        # Re-raise HTTP exceptions so FastAPI handles them correctly
+        raise
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/projects")
