@@ -1575,8 +1575,13 @@ Archivo procesado: {file.filename}
         
         return result
         
+    except HTTPException:
+        # Re-raise HTTP exceptions so FastAPI handles them correctly
+        raise
     except Exception as e:
         print(f"Error analyzing document: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error analizando documento: {str(e)}")
 
 # Dashboard Stats Endpoint
