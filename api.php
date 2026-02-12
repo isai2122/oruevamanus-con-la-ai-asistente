@@ -5,6 +5,12 @@ header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
 $data_file = 'data_store.json';
+$log_file = 'api_errors.log';
+
+function log_error($msg) {
+    global $log_file;
+    file_put_contents($log_file, date('[Y-m-d H:i:s] ') . $msg . "\n", FILE_APPEND);
+}
 
 // Inicializar archivo si no existe
 if (!file_exists($data_file)) {
@@ -24,23 +30,38 @@ if ($method === 'OPTIONS') {
 }
 
 if ($method === 'GET') {
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
     echo file_get_contents($data_file);
 } 
 elseif ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    // Soporte para FormData (más robusto contra firewalls)
+    $key = isset($_POST['key']) ? $_POST['key'] : null;
+    $value = isset($_POST['value']) ? json_decode($_POST['value'], true) : null;
+
+    if ($key && $value !== null) {
+        $input = [$key => $value];
+    } else {
+        // Fallback a JSON raw si no es FormData
+        $raw_input = file_get_contents('php://input');
+        $input = json_decode($raw_input, true);
+    }
+
     if (!$input) {
-        echo json_encode(["error" => "Invalid data"]);
+        log_error("POST fallido. No se detectó FormData ni JSON válido. POST keys: " . implode(',', array_keys($_POST)));
+        echo json_encode(["status" => "error", "message" => "No se recibieron datos válidos"]);
         exit;
     }
 
-    $current_data = json_decode(file_get_contents($data_file), true);
+    $current_data = json_decode(file_get_contents($data_file), true) ?: [];
     
-    // Actualizar campos específicos si vienen en el POST
-    if (isset($input['posts'])) $current_data['posts'] = $input['posts'];
-    if (isset($input['banners'])) $current_data['banners'] = $input['banners'];
-    if (isset($input['aboutContent'])) $current_data['aboutContent'] = $input['aboutContent'];
-    if (isset($input['socialLinks'])) $current_data['socialLinks'] = $input['socialLinks'];
-    if (isset($input['schoolLogo'])) $current_data['schoolLogo'] = $input['schoolLogo'];
+    // Actualizar campos específicos
+    foreach (['posts', 'banners', 'aboutContent', 'socialLinks', 'schoolLogo'] as $f) {
+        if (isset($input[$f])) {
+            $current_data[$f] = $input[$f];
+        }
+    }
     
     $json_string = json_encode($current_data);
     if ($json_string === false) {

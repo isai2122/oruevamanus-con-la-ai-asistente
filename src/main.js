@@ -14,12 +14,14 @@ const app = document.getElementById("root");
 // Función helper para sincronizar con el servidor
 async function syncWithServer(key, value) {
   try {
-    const data = {};
-    data[key] = value;
+    // Usar FormData en lugar de JSON para el POST, ya que suele ser menos bloqueado por firewalls
+    const formData = new FormData();
+    formData.append('key', key);
+    formData.append('value', JSON.stringify(value));
+    
     const response = await fetch('/api.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: formData
     });
     
     if (!response.ok) {
@@ -42,11 +44,12 @@ async function syncWithServer(key, value) {
 
 // Inicialización principal - NO forzar login
 async function initializeApp() {
-  // Intentar sincronizar con el servidor al iniciar
+  // Intentar sincronizar con el servidor al iniciar (con bust-cache)
   try {
-    const response = await fetch('/api.php');
+    const response = await fetch(`/api.php?t=${Date.now()}`, { cache: 'no-store' });
     if (response.ok) {
       const serverData = await response.json();
+      console.log("[Sync] Datos recibidos del servidor");
       if (serverData.posts) localStorage.setItem("posts", JSON.stringify(serverData.posts));
       if (serverData.banners) localStorage.setItem("banners", JSON.stringify(serverData.banners));
       if (serverData.aboutContent) localStorage.setItem("aboutContent", JSON.stringify(serverData.aboutContent));
