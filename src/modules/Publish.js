@@ -167,10 +167,15 @@ async function handlePublishSubmit(modal, onComplete, editPost, isEditing) {
       mediaUrl = processExternalUrl(externalUrl);
       finalMediaType = detectMediaType(externalUrl) || mediaType;
     } else if (localFile) {
-      if (localFile.size > 5 * 1024 * 1024) {
-        throw new Error('El archivo es muy grande. Máximo 5MB');
+      if (localFile.type.startsWith('image/')) {
+        // Comprimir imagen a máximo 800px de ancho para ahorrar espacio
+        mediaUrl = await compressImage(localFile, 800, 0.7);
+      } else {
+        if (localFile.size > 10 * 1024 * 1024) {
+          throw new Error('El archivo de video es muy grande. Máximo 10MB');
+        }
+        mediaUrl = await fileToDataURL(localFile);
       }
-      mediaUrl = await fileToDataURL(localFile);
       finalMediaType = localFile.type.startsWith('video/') ? 'video' : 'image';
     } else if (!editPost) {
       // For new posts without media, use placeholder
@@ -194,37 +199,14 @@ async function handlePublishSubmit(modal, onComplete, editPost, isEditing) {
       updatedAt: new Date().toISOString()
     };
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'; // Default to local backend if not set
-    let response;
-    if (isEditing) {
-      response = await fetch(`${apiUrl}/posts/${editPost.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData),
-      });
-    } else {
-      response = await fetch(`${apiUrl}/posts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData),
-      });
-    }
-
-    if (!response.ok) {
-      throw new Error("Error al guardar la publicación.");
-    }
-    const result = await response.json();
-
-    // trigger cross-tab and same-tab update
-    window.dispatchEvent(new Event("app:postsUpdated"));
-
-    // Success callback
+    // Ya no usamos la API externa, delegamos al callback de main.js
+    // que maneja la sincronización centralizada
     if (typeof onComplete === 'function') {
-      onComplete(postData);
+      await onComplete(postData);
     }
 
     modal.remove();
-    showToast(editPost ? "✅ Publicación actualizada exitosamente" : "🚀 Publicación creada exitosamente", "success");
+    // El resto de la lógica (toast, eventos) se maneja en el callback de main.js
 
   } catch (error) {
     showToast(`❌ Error: ${error.message}`, "error");
@@ -360,6 +342,35 @@ function fileToDataURL(file) {
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(new Error('Error reading file'));
     reader.readAsDataURL(file);
+  });
+}
+
+function compressImage(file, maxWidth, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
   });
 }
 

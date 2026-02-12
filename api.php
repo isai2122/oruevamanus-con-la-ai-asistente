@@ -42,10 +42,17 @@ elseif ($method === 'POST') {
     if (isset($input['socialLinks'])) $current_data['socialLinks'] = $input['socialLinks'];
     if (isset($input['schoolLogo'])) $current_data['schoolLogo'] = $input['schoolLogo'];
     
-    if (file_put_contents($data_file, json_encode($current_data))) {
+    $json_string = json_encode($current_data);
+    if ($json_string === false) {
+        echo json_encode(["status" => "error", "message" => "JSON encoding error: " . json_last_error_msg()]);
+        exit;
+    }
+    
+    if (file_put_contents($data_file, $json_string)) {
         echo json_encode(["status" => "success", "message" => "Data saved"]);
     } else {
-        echo json_encode(["status" => "error", "message" => "Could not save data"]);
+        $error = error_get_last();
+        echo json_encode(["status" => "error", "message" => "Could not save data to $data_file. Error: " . ($error ? $error['message'] : 'Unknown')]);
     }
 }
 ?>

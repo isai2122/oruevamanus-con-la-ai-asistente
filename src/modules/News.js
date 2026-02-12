@@ -4,16 +4,8 @@ export async function renderNews(container, posts = null) {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   let allPosts = [];
   if (!posts) {
-    try {
-      const response = await fetch(`${apiUrl}/api/posts`);
-      if (response.ok) {
-        allPosts = await response.json();
-      } else {
-        console.error("Error fetching posts:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    }
+    // Usar posts del localStorage sincronizados
+    allPosts = JSON.parse(localStorage.getItem("posts") || "[]");
   } else {
     allPosts = posts;
   }

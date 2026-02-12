@@ -16,13 +16,27 @@ async function syncWithServer(key, value) {
   try {
     const data = {};
     data[key] = value;
-    await fetch('/api.php', {
+    const response = await fetch('/api.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
+      throw new Error(errorData.message || `Error del servidor: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    if (result.status === 'error') {
+      throw new Error(result.message);
+    }
+    console.log(`[Sync] ${key} sincronizado correctamente`);
+    return true;
   } catch (err) {
-    console.error("Error al sincronizar con servidor:", err);
+    console.error(`[Sync] Error sincronizando ${key}:`, err);
+    showToast(`❌ Error de sincronización: ${err.message}`, "error");
+    return false;
   }
 }
 
@@ -81,17 +95,24 @@ async function initializeApp() {
       case "publish":
         // Importar dinámicamente y abrir modal
         import("./modules/Publish.js").then(mod => {
-          mod.renderPublish(document.body, (newPost) => {
+          mod.renderPublish(document.body, async (newPost) => {
             // Actualizar posts locales
-            allPosts.unshift(newPost);
-            localStorage.setItem("posts", JSON.stringify(allPosts));
-            syncWithServer("posts", allPosts);
-    // trigger cross-tab and same-tab update
-    localStorage.setItem('posts_update_ts', Date.now().toString());
-    window.dispatchEvent(new Event('app:postsUpdated'));
+            const updatedPosts = [newPost, ...allPosts];
             
-            // Toast de confirmación
-            showToast("✅ Publicación creada exitosamente", "success");
+            // Primero intentar sincronizar con el servidor
+            const success = await syncWithServer("posts", updatedPosts);
+            
+            if (success) {
+              allPosts = updatedPosts;
+              localStorage.setItem("posts", JSON.stringify(allPosts));
+              // trigger cross-tab and same-tab update
+              localStorage.setItem('posts_update_ts', Date.now().toString());
+              window.dispatchEvent(new Event('app:postsUpdated'));
+              showToast("✅ Publicación creada exitosamente", "success");
+            } else {
+              // Si falla el servidor, no actualizamos el estado local para evitar inconsistencias
+              console.error("No se pudo guardar en el servidor, la publicación no se guardó.");
+            }
             
             // Refrescar vista actual si es necesario
             const currentPage = getCurrentPage();
