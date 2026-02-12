@@ -360,6 +360,8 @@ function isVideoUrl(url = "") {
 
 function saveBanners() {
   localStorage.setItem("banners", JSON.stringify(banners));
+  // Sincronizar con servidor
+  fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ banners }) });
 }
 
 function fileToDataURL(file) {

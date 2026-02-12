@@ -497,6 +497,8 @@ function renderSocialsList() {
       if (socialLinks[index]) {
         socialLinks[index].name = e.target.value.trim();
         localStorage.setItem('socialLinks', JSON.stringify(socialLinks));
+        // Sincronizar con servidor
+        fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ socialLinks }) });
         renderSocialDropdown();
         renderSocialsList(); // Re-render to update icon
       }
@@ -510,6 +512,8 @@ function renderSocialsList() {
       if (socialLinks[index]) {
         socialLinks[index].url = e.target.value.trim();
         localStorage.setItem('socialLinks', JSON.stringify(socialLinks));
+        // Sincronizar con servidor
+        fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ socialLinks }) });
         renderSocialDropdown();
       }
     });
@@ -546,6 +550,8 @@ function addNewSocial() {
 
   socialLinks.push({ name, url });
   localStorage.setItem('socialLinks', JSON.stringify(socialLinks));
+  // Sincronizar con servidor
+  fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ socialLinks }) });
 
   // Clear form
   nameInput.value = '';
@@ -565,6 +571,8 @@ window.removeSocial = function(index) {
   const socialLinks = JSON.parse(localStorage.getItem('socialLinks') || '[]');
   socialLinks.splice(index, 1);
   localStorage.setItem('socialLinks', JSON.stringify(socialLinks));
+  // Sincronizar con servidor
+  fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ socialLinks }) });
 
   renderSocialsList();
   renderSocialDropdown();

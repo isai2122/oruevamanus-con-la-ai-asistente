@@ -62,6 +62,8 @@ export function renderLayout(container, contentCallback) {
         const logoEl = document.getElementById("school-logo");
         if (logoEl) logoEl.src = logoData;
         localStorage.setItem("schoolLogo", logoData);
+        // Sincronizar con servidor
+        fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schoolLogo: logoData }) });
         showToast("Logo actualizado", "success");
       };
       reader.onerror = () => showToast("Error al cargar imagen", "error");

@@ -109,6 +109,8 @@ function getStoredAbout() {
 
 function saveStoredAbout(obj) {
   localStorage.setItem("aboutContent", JSON.stringify(obj));
+  // Sincronizar con servidor
+  fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aboutContent: obj }) });
   window.dispatchEvent(new CustomEvent("aboutUpdated", { detail: obj }));
 }
 

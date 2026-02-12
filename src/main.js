@@ -11,8 +11,38 @@ import { setupBannerSection } from "./modules/Banners.js";
 
 const app = document.getElementById("root");
 
+// Función helper para sincronizar con el servidor
+async function syncWithServer(key, value) {
+  try {
+    const data = {};
+    data[key] = value;
+    await fetch('/api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (err) {
+    console.error("Error al sincronizar con servidor:", err);
+  }
+}
+
 // Inicialización principal - NO forzar login
-function initializeApp() {
+async function initializeApp() {
+  // Intentar sincronizar con el servidor al iniciar
+  try {
+    const response = await fetch('/api.php');
+    if (response.ok) {
+      const serverData = await response.json();
+      if (serverData.posts) localStorage.setItem("posts", JSON.stringify(serverData.posts));
+      if (serverData.banners) localStorage.setItem("banners", JSON.stringify(serverData.banners));
+      if (serverData.aboutContent) localStorage.setItem("aboutContent", JSON.stringify(serverData.aboutContent));
+      if (serverData.socialLinks) localStorage.setItem("socialLinks", JSON.stringify(serverData.socialLinks));
+      if (serverData.schoolLogo) localStorage.setItem("schoolLogo", serverData.schoolLogo);
+    }
+  } catch (err) {
+    console.warn("Error al sincronizar con el servidor:", err);
+  }
+
   let allPosts = JSON.parse(localStorage.getItem("posts") || "[]");
 
   // Renderizar layout principal
@@ -55,6 +85,7 @@ function initializeApp() {
             // Actualizar posts locales
             allPosts.unshift(newPost);
             localStorage.setItem("posts", JSON.stringify(allPosts));
+            syncWithServer("posts", allPosts);
     // trigger cross-tab and same-tab update
     localStorage.setItem('posts_update_ts', Date.now().toString());
     window.dispatchEvent(new Event('app:postsUpdated'));
