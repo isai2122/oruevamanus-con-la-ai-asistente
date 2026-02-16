@@ -1,7 +1,6 @@
 import { renderPublishView } from './PublishView.js';
 
 export async function renderNews(container, posts = null) {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   let allPosts = [];
   if (!posts) {
     // Usar posts del localStorage sincronizados
@@ -9,7 +8,13 @@ export async function renderNews(container, posts = null) {
   } else {
     allPosts = posts;
   }
-  const newsPosts = allPosts.filter(post => post.category === 'noticias');
+  
+  // Normalizar categorías para el filtro
+  const newsPosts = allPosts.filter(post => {
+    const cat = (post.category || '').toLowerCase();
+    return cat === 'noticias' || cat === 'news';
+  });
+  
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   container.innerHTML = `

@@ -168,8 +168,8 @@ async function handlePublishSubmit(modal, onComplete, editPost, isEditing) {
       finalMediaType = detectMediaType(externalUrl) || mediaType;
     } else if (localFile) {
       if (localFile.type.startsWith('image/')) {
-        // Comprimir imagen a máximo 800px de ancho para ahorrar espacio
-        mediaUrl = await compressImage(localFile, 800, 0.7);
+        // Compresión agresiva para evitar bloqueos del servidor (max 800px, calidad 0.4)
+        mediaUrl = await compressImage(localFile, 800, 0.4);
       } else {
         if (localFile.size > 10 * 1024 * 1024) {
           throw new Error('El archivo de video es muy grande. Máximo 10MB');
@@ -188,7 +188,8 @@ async function handlePublishSubmit(modal, onComplete, editPost, isEditing) {
     }
 
     const postData = {
-      id: editPost ? editPost.id : undefined,      title,
+      id: editPost ? editPost.id : Date.now(),
+      title,
       description,
       category,
       image: mediaUrl,
@@ -199,14 +200,11 @@ async function handlePublishSubmit(modal, onComplete, editPost, isEditing) {
       updatedAt: new Date().toISOString()
     };
 
-    // Ya no usamos la API externa, delegamos al callback de main.js
-    // que maneja la sincronización centralizada
     if (typeof onComplete === 'function') {
       await onComplete(postData);
     }
 
     modal.remove();
-    // El resto de la lógica (toast, eventos) se maneja en el callback de main.js
 
   } catch (error) {
     showToast(`❌ Error: ${error.message}`, "error");

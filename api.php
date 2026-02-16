@@ -1,79 +1,90 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Content-Type: application/json");
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');
 
-$data_file = 'data_store.json';
-$log_file = 'api_errors.log';
-
-function log_error($msg) {
-    global $log_file;
-    file_put_contents($log_file, date('[Y-m-d H:i:s] ') . $msg . "\n", FILE_APPEND);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit;
 }
 
-// Inicializar archivo si no existe
-if (!file_exists($data_file)) {
-    file_put_contents($data_file, json_encode([
+// Configuración de la base de datos
+$db_host = 'localhost';
+$db_user = 'iedvalsp_admin';
+$db_pass = 'IEValdivia#2026';
+$db_name = 'iedvalsp_iedvalsp';
+
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+
+if ($conn->connect_error) {
+    echo json_encode(["status" => "error", "message" => "Error de conexión: " . $conn->connect_error]);
+    exit;
+}
+
+// Asegurar que la tabla existe
+$conn->query("CREATE TABLE IF NOT EXISTS site_data (
+    data_key VARCHAR(50) PRIMARY KEY,
+    data_value LONGTEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)");
+
+// Manejar peticiones GET (Leer datos)
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $result = $conn->query("SELECT data_key, data_value FROM site_data");
+    $data = [
         "posts" => [],
         "banners" => [],
         "aboutContent" => null,
         "socialLinks" => [],
         "schoolLogo" => null
-    ]));
-}
-
-$method = $_SERVER['REQUEST_METHOD'];
-
-if ($method === 'OPTIONS') {
-    exit;
-}
-
-if ($method === 'GET') {
-    header('Cache-Control: no-cache, no-store, must-revalidate');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-    echo file_get_contents($data_file);
-} 
-elseif ($method === 'POST') {
-    // Soporte para FormData (más robusto contra firewalls)
-    $key = isset($_POST['key']) ? $_POST['key'] : null;
-    $value = isset($_POST['value']) ? json_decode($_POST['value'], true) : null;
-
-    if ($key && $value !== null) {
-        $input = [$key => $value];
-    } else {
-        // Fallback a JSON raw si no es FormData
-        $raw_input = file_get_contents('php://input');
-        $input = json_decode($raw_input, true);
-    }
-
-    if (!$input) {
-        log_error("POST fallido. No se detectó FormData ni JSON válido. POST keys: " . implode(',', array_keys($_POST)));
-        echo json_encode(["status" => "error", "message" => "No se recibieron datos válidos"]);
-        exit;
-    }
-
-    $current_data = json_decode(file_get_contents($data_file), true) ?: [];
+    ];
     
-    // Actualizar campos específicos
-    foreach (['posts', 'banners', 'aboutContent', 'socialLinks', 'schoolLogo'] as $f) {
-        if (isset($input[$f])) {
-            $current_data[$f] = $input[$f];
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $data[$row['data_key']] = json_decode($row['data_value']);
         }
     }
     
-    $json_string = json_encode($current_data);
-    if ($json_string === false) {
-        echo json_encode(["status" => "error", "message" => "JSON encoding error: " . json_last_error_msg()]);
+    echo json_encode($data);
+}
+
+// Manejar peticiones POST (Guardar datos)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $key = $_POST['key'] ?? '';
+    $value = $_POST['value'] ?? '';
+    
+    // Si no viene vía POST convencional, intentar JSON raw
+    if (empty($key)) {
+        $raw = file_get_contents('php://input');
+        $input = json_decode($raw, true);
+        if ($input) {
+            foreach (['posts', 'banners', 'aboutContent', 'socialLinks', 'schoolLogo'] as $f) {
+                if (isset($input[$f])) {
+                    $key = $f;
+                    $value = json_encode($input[$f]);
+                    break;
+                }
+            }
+        }
+    }
+
+    if (empty($key)) {
+        echo json_encode(["status" => "error", "message" => "No se recibieron datos válidos"]);
         exit;
     }
     
-    if (file_put_contents($data_file, $json_string)) {
-        echo json_encode(["status" => "success", "message" => "Data saved"]);
+    // Usar prepared statements para seguridad y manejo de datos pesados
+    $stmt = $conn->prepare("INSERT INTO site_data (data_key, data_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_value = ?");
+    $stmt->bind_param("sss", $key, $value, $value);
+    
+    if ($stmt->execute()) {
+        echo json_encode(["status" => "success", "message" => "Datos guardados correctamente en MySQL"]);
     } else {
-        $error = error_get_last();
-        echo json_encode(["status" => "error", "message" => "Could not save data to $data_file. Error: " . ($error ? $error['message'] : 'Unknown')]);
+        echo json_encode(["status" => "error", "message" => "Error al guardar: " . $stmt->error]);
     }
+    
+    $stmt->close();
 }
+
+$conn->close();
 ?>

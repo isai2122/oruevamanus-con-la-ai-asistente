@@ -1,8 +1,14 @@
 import { renderPublishView } from './PublishView.js';
 
-export function renderProjects(container, posts = null) {
+export async function renderProjects(container, posts = null) {
   const allPosts = posts || JSON.parse(localStorage.getItem("posts") || "[]");
-  const projectPosts = allPosts.filter(post => post.category === 'proyectos');
+  
+  // Normalizar categorías para el filtro
+  const projectPosts = allPosts.filter(post => {
+    const cat = (post.category || '').toLowerCase();
+    return cat === 'proyectos' || cat === 'projects';
+  });
+  
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   container.innerHTML = `

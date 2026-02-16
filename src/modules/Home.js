@@ -298,11 +298,16 @@ window.toggleLike = function(postId) {
   posts[postIndex].likes = (posts[postIndex].likes || 0) + 1;
   posts[postIndex].liked = true;
   localStorage.setItem("posts", JSON.stringify(posts));
-  // Sincronizar con servidor
-  fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ posts }) });
-    // trigger cross-tab and same-tab update
-    localStorage.setItem('posts_update_ts', Date.now().toString());
-    window.dispatchEvent(new Event('app:postsUpdated'));
+  
+  // Sincronizar con servidor usando FormData para evitar bloqueos
+  const formData = new FormData();
+  formData.append('key', 'posts');
+  formData.append('value', JSON.stringify(posts));
+  fetch('api.php', { method: 'POST', body: formData });
+  
+  // trigger cross-tab and same-tab update
+  localStorage.setItem('posts_update_ts', Date.now().toString());
+  window.dispatchEvent(new Event('app:postsUpdated'));
 
   // Update UI
   const likeBtn = document.querySelector(`button[onclick="toggleLike(${postId})"]`);
@@ -325,9 +330,15 @@ window.editPost = function(postId) {
       if (postIndex !== -1) {
         posts[postIndex] = editedPost;
         localStorage.setItem("posts", JSON.stringify(posts));
-    // trigger cross-tab and same-tab update
-    localStorage.setItem('posts_update_ts', Date.now().toString());
-    window.dispatchEvent(new Event('app:postsUpdated'));
+        
+        // Sincronizar con servidor usando FormData
+        const formData = new FormData();
+        formData.append('key', 'posts');
+        formData.append('value', JSON.stringify(posts));
+        fetch('api.php', { method: 'POST', body: formData });
+        
+        localStorage.setItem('posts_update_ts', Date.now().toString());
+        window.dispatchEvent(new Event('app:postsUpdated'));
         showToast("✅ Publicación actualizada", "success");
         setTimeout(() => location.reload(), 1000);
       }
@@ -341,11 +352,15 @@ window.deletePost = function(postId) {
   const posts = JSON.parse(localStorage.getItem("posts") || "[]");
   const filteredPosts = posts.filter(p => p.id !== postId);
   localStorage.setItem("posts", JSON.stringify(filteredPosts));
-  // Sincronizar con servidor
-  fetch('/api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ posts: filteredPosts }) });
-    // trigger cross-tab and same-tab update
-    localStorage.setItem('posts_update_ts', Date.now().toString());
-    window.dispatchEvent(new Event('app:postsUpdated'));
+  
+  // Sincronizar con servidor usando FormData
+  const formData = new FormData();
+  formData.append('key', 'posts');
+  formData.append('value', JSON.stringify(filteredPosts));
+  fetch('api.php', { method: 'POST', body: formData });
+  
+  localStorage.setItem('posts_update_ts', Date.now().toString());
+  window.dispatchEvent(new Event('app:postsUpdated'));
 
   showToast("🗑️ Publicación eliminada", "success");
   setTimeout(() => location.reload(), 1000);
