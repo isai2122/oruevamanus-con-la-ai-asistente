@@ -12,6 +12,7 @@ import { setupBannerSection } from "./modules/Banners.js";
 const app = document.getElementById("root");
 
 // Definir la URL base de la API (apunta al mismo servidor donde se aloja la web)
+// Forzamos que sea relativo para evitar Vercel
 const API_BASE_URL = ''; 
 
 // Función helper para sincronizar con el servidor
@@ -22,7 +23,8 @@ async function syncWithServer(key, value) {
     formData.append('key', key);
     formData.append('value', JSON.stringify(value));
     
-    const response = await fetch(`${API_BASE_URL}/api.php`, {
+    // Añadimos un timestamp para evitar cache en la petición POST (algunos proxies lo hacen)
+    const response = await fetch(`api.php?v=${Date.now()}`, {
       method: 'POST',
       body: formData,
       cache: 'no-cache'
@@ -48,9 +50,12 @@ async function syncWithServer(key, value) {
 
 // Inicialización principal - NO forzar login
 async function initializeApp() {
-  // Intentar sincronizar con el servidor al iniciar (con bust-cache)
+  // Intentar sincronizar con el servidor al iniciar (con bust-cache agresivo)
   try {
-    const response = await fetch(`${API_BASE_URL}/api.php?t=${Date.now()}`, { cache: 'no-store' });
+    const response = await fetch(`api.php?v=${Date.now()}`, { 
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+    });
     if (response.ok) {
       const serverData = await response.json();
       console.log("[Sync] Datos recibidos del servidor");
