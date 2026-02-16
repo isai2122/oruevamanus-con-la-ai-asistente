@@ -3,7 +3,7 @@ import { renderPublishView } from './PublishView.js';
 export async function renderNews(container, posts = null) {
   let allPosts = [];
   if (!posts) {
-    // Usar posts del localStorage sincronizados
+    // Usar posts del localStorage sincronizados (que vienen de api.php)
     allPosts = JSON.parse(localStorage.getItem("posts") || "[]");
   } else {
     allPosts = posts;
@@ -276,8 +276,8 @@ function convertToEmbed(url) {
 window.openPublishModal = window.openPublishModal || function(category = '') {
   import('./Publish.js').then(mod => {
     mod.renderPublish(document.body, (newPost) => {
-      const cb = window.showToast || function(){};
-      if (typeof cb === 'function') cb("📰 Noticia publicada correctamente", "success");
+      // Usar la función de sincronización global de main.js indirectamente a través del evento
+      // O simplemente forzar el reload que gatilla la sincronización de initializeApp
       setTimeout(() => location.reload(), 800);
     });
     if (category) {
